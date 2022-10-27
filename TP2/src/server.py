@@ -1,30 +1,43 @@
 import socket
+import threading
 
 localIP = "127.0.0.1"
 localPort = 20001
-bufferSize = 1024
-msgFromServer = "Hello UDP Client"
-bytesToSend = str.encode(msgFromServer)
+ADDR = (localIP, localPort)
+HEADER = 64
+FORMAT = 'utf-8'
+DISCONNECT_MESSAGE = "!DISCONNECT"
 
 # Create a datagram socket
-UDPServerSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+server = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 
 # Bind to address and ip
-UDPServerSocket.bind((localIP, localPort))
+server.bind(ADDR)
 
 print("UDP server up and listening")
 
-# Listen for incoming datagrams
-while (True):
-    bytesAddressPair = UDPServerSocket.recvfrom(bufferSize)
-    message = bytesAddressPair[0]
-    address = bytesAddressPair[1]
 
-    clientMsg = "Message from Client:{}".format(message)
-    clientIP = "Client IP Address:{}".format(address)
+def handle_client(conn, addr):
+    print(f'[NEW CONNECTION] {addr} connected.')
+    connected = True
+    while connected:
+        msg_length = conn.recv(HEADER).decode(FORMAT)
+        msg_length = int(msg_length)
+        msg = conn.recv(msg_length).decode(FORMAT)
+        if msg == DISCONNECT_MESSAGE:
+            connected = False
+        print(f'[{addr}] sent {msg}')
+    conn.close()
 
-    print(clientMsg)
-    print(clientIP)
 
-    # Sending a reply to client
-    UDPServerSocket.sendto(bytesToSend, address)
+def start():
+    print(f"[STARTING] server on {localPort} port.")
+    server.listen()
+    while True:
+        conn, addr = server.accept()
+        thread = threading.Thread(target=handleClient(conn, addr))
+        thread.start()
+        print(f'[ACTIVE CONNECTIONS] {threading.activeCount() - 1}')
+
+
+start()
