@@ -2,6 +2,7 @@ import socket
 import threading
 import re
 from dijkstra import Graph
+from tabulate import tabulate
 
 
 class interface:
@@ -42,13 +43,9 @@ class oNode:
         for n in neighbors_aux:
             neighbors.append((getIndex(nodes,n[0].ip),getIndex(nodes,n[1].ip),1))
 
-        graph = Graph(len(nodes),neighbors)
+        graph = Graph(len(nodes),nodes,neighbors)
+        graph.generateFile()
 
-        for src in range(len(graph.graph)):
-            print(graph.dijkstra(src))
-
-        return nodes,graph
-
-#                                     0          1          2           1         2           3
-    grapf = constructGraph('oNode [10.0.0.1 : 10.0.0.2 , 10.0.0.3] [10.0.0.2 : 10.0.0.3, 10.0.0.6]')
+    #                                   0          1          2           1         2          3
+    # grapf = constructGraph('oNode [10.0.0.1 : 10.0.0.2 , 10.0.0.3] [10.0.0.2 : 10.0.0.3, 10.0.0.6]')
     
