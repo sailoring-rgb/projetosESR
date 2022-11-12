@@ -44,6 +44,9 @@ class oNode:
 
         graph = Graph(len(nodes),neighbors)
 
+        for src in range(len(graph.graph)):
+            print(graph.dijkstra(src))
+
         return nodes,graph
 
 #                                     0          1          2           1         2           3
