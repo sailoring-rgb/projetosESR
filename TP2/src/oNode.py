@@ -1,9 +1,4 @@
-import socket
-import threading
 import re
-from dijkstra import Graph
-from tabulate import tabulate
-
 
 class interface:
 
@@ -22,11 +17,12 @@ def getIndex(li,ip):
 
 class oNode:
 
-    # oNode [ip1:ip2] [ip2:ip3,ip4] [ip3:ip4,ip5]
+    # RECEBER COMANDO ...
+    
     def constructGraph(command):
         nodes = []
         pairs = re.findall("(?:\[(.*?)\])",command) #['A:B,C', 'B:C', 'C:D,E']
-        neighbors_aux = []   # [ (indA,indB,distanceAB), (indA,indB,distanceAC), (ind,C,distanceBC) ]
+        neighbors = []   # [ (indA,indB,distanceAB), (indA,indB,distanceAC), (ind,C,distanceBC) ]
         for p in pairs:
             ips = re.split(r'\s*:\s*', p) # 'C', 'D,E'
             interf1 = interface(ips[0],[],[])
@@ -37,15 +33,6 @@ class oNode:
                 interf2 = interface(next,[],[])
                 if not any(obj.ip == next for obj in nodes):
                     nodes.append(interf2)
-                neighbors_aux.append((interf1,interf2))
+                neighbors.append((getIndex(nodes,interf1.ip),(getIndex(nodes,interf2.ip))))
 
-        neighbors = []
-        for n in neighbors_aux:
-            neighbors.append((getIndex(nodes,n[0].ip),getIndex(nodes,n[1].ip),1))
-
-        graph = Graph(len(nodes),nodes,neighbors)
-        graph.generateFile()
-
-    #                                   0          1          2           1         2          3
-    # grapf = constructGraph('oNode [10.0.0.1 : 10.0.0.2 , 10.0.0.3] [10.0.0.2 : 10.0.0.3, 10.0.0.6]')
-    
+        return nodes,neighbors
