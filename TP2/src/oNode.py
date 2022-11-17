@@ -33,6 +33,9 @@ class threads:
 # --------------------- APP ONODE ---------------------
 class oNode:
 
+    def __init__(self):
+        pass
+        
     def overlayNetwork(self, command):
         nodes = []
         pairs = re.findall("(?:\[(.*?)\])",command) #['A:B,C', 'B:C', 'C:D,E']
@@ -61,10 +64,3 @@ class oNode:
         # client.join()
         # updateRouteTable.join()
     """
-    
-nodes,neigh = oNode.overlayNetwork("oNode [10.0.0.1 : 10.0.0.2 , 10.0.0.3] [10.0.0.2 : 10.0.0.3, 10.0.0.6]")
-
-for a in nodes:
-    print(a.ip)
-for b in neigh:
-    print(b[0],b[1])

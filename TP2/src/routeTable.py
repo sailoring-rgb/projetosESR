@@ -14,15 +14,15 @@ def routeTableInFile(graph):
         values.append(nodes[node].ip)
         values = values + graph.dijkstra(node)
         table.append(values)
-    print("hey")
+        
     f = open("routeTable.csv", "w")
-    print("hey2")
     f.write(tabulate(table))
     f.close()
 
     # COMMAND EXAMPLE:
     # 'oNode [10.0.0.1 : 10.0.0.2 , 10.0.0.3] [10.0.0.2 : 10.0.0.3, 10.0.0.6]'
     # index:     0           1          2          1          2         3
+
 app = oNode()
 nodes,neighbors = app.overlayNetwork('oNode [10.0.0.1 : 10.0.0.2 , 10.0.0.3] [10.0.0.2 : 10.0.0.3, 10.0.0.6]')
 
