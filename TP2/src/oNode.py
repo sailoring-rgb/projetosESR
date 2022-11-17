@@ -1,8 +1,8 @@
 import re
 from threading import Thread
 import time
-import server
-import client
+#import server
+#import client
 
 def getIndex(li,ip):
     for index, x in enumerate(li):
@@ -17,7 +17,7 @@ class interface:
         self.ip = ip                           # ips das interfaces ligadas aos nodos 
         self.requiredFiles = requiredFiles     # lista de ficheiros que ele quer
         self.currentFiles = currentFiles       # lista de ficheiros que ele tem
-
+"""
 # ---------------------- THREADS ----------------------
 class threads:
 
@@ -29,11 +29,11 @@ class threads:
     
     def thread3(self):
         pass
-
+"""
 # --------------------- APP ONODE ---------------------
 class oNode:
 
-    def overlayNetwork(command):
+    def overlayNetwork(self, command):
         nodes = []
         pairs = re.findall("(?:\[(.*?)\])",command) #['A:B,C', 'B:C', 'C:D,E']
         neighbors = []   # [ (indA,indB,distanceAB), (indA,indB,distanceAC), (ind,C,distanceBC) ]
@@ -49,7 +49,7 @@ class oNode:
                     nodes.append(interf2)
                 neighbors.append((getIndex(nodes,interf1.ip),(getIndex(nodes,interf2.ip))))
         return nodes,neighbors
-    
+    """
     def start():
         server = Thread(target=threads().thread1(), args=())
         client = Thread(target=threads().thread2(), args=())
@@ -60,3 +60,11 @@ class oNode:
         # server.join()
         # client.join()
         # updateRouteTable.join()
+    """
+    
+nodes,neigh = oNode.overlayNetwork("oNode [10.0.0.1 : 10.0.0.2 , 10.0.0.3] [10.0.0.2 : 10.0.0.3, 10.0.0.6]")
+
+for a in nodes:
+    print(a.ip)
+for b in neigh:
+    print(b[0],b[1])
