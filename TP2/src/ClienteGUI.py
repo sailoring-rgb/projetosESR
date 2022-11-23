@@ -1,5 +1,6 @@
+import logging
 from tkinter import *
-import tkinter.messagebox
+import tkinter.messagebox as tkMessageBox
 from PIL import Image, ImageTk
 import socket, threading, sys, traceback, os
 
@@ -15,13 +16,15 @@ class ClienteGUI:
 		self.master = master
 		self.master.protocol("WM_DELETE_WINDOW", self.handler)
 		self.createWidgets()
-		self.addr = addr
-		self.port = int(port)
+		self.addr = addr        # not there
+		self.port = int(port)   # not there
+		######################### self.packet = []
 		self.rtspSeq = 0
 		self.sessionId = 0
 		self.requestSent = -1
 		self.teardownAcked = 0
-		self.openRtpPort()
+		######################### self.ott = ott_manager
+		self.openRtpPort()      # not there
 		self.playMovie()
 		self.frameNbr = 0
 		
@@ -71,12 +74,14 @@ class ClienteGUI:
 	def playMovie(self):
 		"""Play button handler."""
 		# Create a new thread to listen for RTP packets
-		threading.Thread(target=self.listenRtp).start()
+		threading.Thread(target=self.listenRtp).start()   # not there
 		self.playEvent = threading.Event()
 		self.playEvent.clear()
 	
+	"""
+	################### ORIGINAL ##################
 	def listenRtp(self):		
-		"""Listen for RTP packets."""
+		# Listen for RTP packets.
 		while True:
 			try:
 				data = self.rtpSocket.recv(20480)
@@ -98,8 +103,26 @@ class ClienteGUI:
 				self.rtpSocket.shutdown(socket.SHUT_RDWR)
 				self.rtpSocket.close()
 				break
-				
-	
+	"""	
+
+	def listenRtp(self,data):		
+		"""Listen for RTP packets."""
+		if not data:
+			return
+		
+		rtpPacket = RtpPacket()
+		rtpPacket.decode(data)
+					
+		currFrameNbr = rtpPacket.seqNum()
+		# print("Current Seq Num: " + str(currFrameNbr))
+
+		if currFrameNbr < 5:
+			self.frameNbr = currFrameNbr
+
+		if currFrameNbr > self.frameNbr: # Discard the late packet
+			self.frameNbr = currFrameNbr
+			self.updateMovie(self.writeFrame(rtpPacket.getPayload()))
+
 	def writeFrame(self, data):
 		"""Write the received frame to a temp image file. Return the image file."""
 		cachename = CACHE_FILE_NAME + str(self.sessionId) + CACHE_FILE_EXT
@@ -114,10 +137,11 @@ class ClienteGUI:
 		photo = ImageTk.PhotoImage(Image.open(imageFile))
 		self.label.configure(image = photo, height=288) 
 		self.label.image = photo
-		
 	
+	"""
+	################### ORIGINAL #################
 	def openRtpPort(self):
-		"""Open RTP socket binded to a specified port."""
+		# Open RTP socket binded to a specified port.
 		# Create a new datagram socket to receive RTP packets from the server
 		self.rtpSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		
@@ -130,6 +154,7 @@ class ClienteGUI:
 			print('\nBind \n')
 		except:
 			tkMessageBox.showwarning('Unable to Bind', 'Unable to bind PORT=%d' %self.rtpPort)
+	"""
 
 	def handler(self):
 		"""Handler on explicitly closing the GUI window."""

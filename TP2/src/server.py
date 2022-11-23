@@ -12,7 +12,7 @@ def processMessage(server, message, addr, data):
 
     # To guarantee that parallelism is happening
     time.sleep(6)
-
+    
     # Send a response to the message received
     server.sendto("Success!!".encode('utf-8'), addr)
 
@@ -92,29 +92,3 @@ def main():
     
 if __name__ == '__main__':
     main()
-
-"""
-def handle_client(conn, addr):
-    print(f'[NEW CONNECTION] {addr} connected.')
-    connected = True
-    while connected:
-        msg_length = conn.recv(HEADER).decode(FORMAT)
-        msg_length = int(msg_length)
-        msg = conn.recv(msg_length).decode(FORMAT)
-        if msg == DISCONNECT_MESSAGE:
-            connected = False
-        print(f'[{addr}] sent {msg}')
-    conn.close()
-
-
-def start():
-    print(f"[STARTING] server on {localPort} port.")
-    server.listen()
-    while True:
-        conn, addr = server.accept()
-        thread = threading.Thread(target=handleClient(conn, addr))
-        thread.start()
-        print(f'[ACTIVE CONNECTIONS] {threading.activeCount() - 1}')
-
-start()
-"""
