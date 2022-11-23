@@ -1,22 +1,48 @@
 import socket
 import threading
 
-localIP = "127.0.0.1"
-localPort = 20001
-ADDR = (localIP, localPort)
-HEADER = 64
-FORMAT = 'utf-8'
-DISCONNECT_MESSAGE = "!DISCONNECT"
+def main():
+    server: socket.socket
+    localIP: str
+    localPort: int
+    message: bytes
+    localAddr: tuple
+    addr: tuple
 
-# Create a datagram socket
-server = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+    localIP = "10.0.0.10"   # ver qual é a porta do servidor
+    localPort = 3001
+    localAddr = (localIP, localPort)
+    """
+    HEADER = 64
+    FORMAT = 'utf-8'
+    DISCONNECT_MESSAGE = "!DISCONNECT"
+    """
+    # Create a datagram socket
+    server = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 
-# Bind to address and ip
-server.bind(ADDR)
+    # Bind to address and ip
+    server.bind(localAddr)
 
-print("UDP server up and listening")
+    # Address and Port Available if print happens
+    print(f'UDP server up and listening on {localIP}: {localPort}')
+
+    # Catch the message - returns message and the device's (ip,port) that sent this message
+    message, addr = server.recvfrom(1024)
+    
+    # Assure message was successfully received
+    print(f"Message {message.decode('utf-8')} received from {addr}")
+
+    # Send a response to the message received
+    server.sendto("Success!!".encode('utf-8'), addr)
+
+    # Close socket
+    server.close()
 
 
+if __name__ == '__main__':
+    main()
+
+"""
 def handle_client(conn, addr):
     print(f'[NEW CONNECTION] {addr} connected.')
     connected = True
@@ -39,5 +65,5 @@ def start():
         thread.start()
         print(f'[ACTIVE CONNECTIONS] {threading.activeCount() - 1}')
 
-
 start()
+"""
