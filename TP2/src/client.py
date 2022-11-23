@@ -1,4 +1,5 @@
 import socket
+import sys
 
 def main():
     client: socket.socket
@@ -11,7 +12,7 @@ def main():
     client = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 
     destIP = '10.0.0.10'
-    destPort = 3001
+    destPort = int(sys.argv[1])
     destAddr = (destIP,destPort)
     messageFromClient = "Hello UDP Server"
 
