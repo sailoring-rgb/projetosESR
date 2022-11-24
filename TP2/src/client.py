@@ -12,8 +12,8 @@ def main():
     client = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 
     destIP = '10.0.0.10'
-    destPortStr = sys.stdin
-    destPort = int(destPortStr)
+    destPort = 4012
+    # destPort = int(sys.argv[1])
     destAddr = (destIP,destPort)
     messageFromClient = "Hello UDP Server"
 
