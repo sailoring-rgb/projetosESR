@@ -33,7 +33,6 @@ class graph:
             row = self.minDistance(time, visited)
             visited[row] = True
             for column in range(self.numVert):
-                if self.graph[row][column] > 0 and visited[column] == False and time[column] > time[row] +
-                        self.graph[row][column]:
+                if self.graph[row][column] > 0 and visited[column] == False and time[column] > time[row] + self.graph[row][column]:
                     time[column] = time[row] + self.graph[row][column]
         return time
