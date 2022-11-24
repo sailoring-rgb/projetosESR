@@ -3,91 +3,73 @@ import threading
 import time
 import database
 
-def processMessage(server, message, addr, data):
-
-    # Assure message was successfully received
-    print(f"Message {message.decode('utf-8')} received from {addr}")
-
+def processMessage(message, addr, server, data):
     data.addNeighbor(addr)
+    server.sendto("Sucess!!".encode('utf-8'), addr)
 
-    # To guarantee that parallelism is happening
-    time.sleep(6)
-    
-    # Send a response to the message received
-    server.sendto("Success!!".encode('utf-8'), addr)
-
-
-def processMessage2(server, message, addr, data):
+def processMessage2(message, addr, server, data):
     data.removeNeighbor(addr)
-    server.sendto("Success!!".encode('utf-8'), addr)
+    server.sendto("Sucess!!".encode('utf-8'), addr)
 
+def service(data):
+    server : socket.socket
+    localIP : str
+    localPort : int
+    message : bytes
+    add : tuple
 
-def service(data, typeService: int):
-    server: socket.socket
-    localIP: str
-    localPort: int
-    message: bytes
-    localAddr: tuple
-    addr: tuple
+    server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    localIP = '10.0.0.10'
+    localPort = 3000
 
-    if typeService == 1:
-        localPort = 3000
-    elif typeService == 2:
-        localPort = 3005
-    else: # typeService == 3
-        pass
-    
-    if typeService == 1 | typeService == 2:
-        localIP = "10.0.0.10"   # ver qual é a porta do servidor
-        localAddr = (localIP, localPort)
+    server.bind((localIP, localPort))
 
-        # Create a datagram socket
-        server = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+    print(f"UDP server up and listening on {localIP}:{localPort}")
 
-        # Bind to address and ip
-        server.bind(localAddr)
+    while True:
+        try:
+            message, add = server.recvfrom(1024)
+            threading.Thread(target=processMessage, args=(message, add, server, data)).start()         
+        except Exception:
+            break
 
-        # Address and Port Available if print happens
-        print(f'UDP server up and listening on {localIP}: {localPort}')
+    server.close()
 
-        # To receive multiple messages:
-        while True:
+def service2(data):
+    server : socket.socket
+    localIP : str
+    localPort : int
+    message : bytes
+    addr : tuple
 
-            try:
-                # Catch the message - returns message and the device's (ip,port) that sent this message
-                message, addr = server.recvfrom(1024)
+    server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    localIP = '10.0.0.10'
+    localPort = 3005
 
-                if typeService == 1:
-                    threading.Thread(target=processMessage, args=(server,message,addr,data)).start()
-                else: #typeService == 2
-                    threading.Thread(target=processMessage2, args=(server,message,addr,data)).start()
+    server.bind((localIP, localPort))
 
-            except socket.error:
-                break
+    print(f"UDP server up and listening on {localIP}:{localPort}")
 
-        # Close socket
-        server.close()
+    while True:
+        try:
+            message, addr = server.recvfrom(1024)
+            threading.Thread(target=processMessage2, args=(message, addr, server, data)).start()         
+        except Exception:
+            break
 
-    elif typeService == 3: # typeService == 3
-        while True:
-            data.printNeighbors()
+    server.close()
+
+def service3(data):
+    while True:
+       data.show() 
 
 def main():
+    data : database.database
 
     data = database.database()
+    threading.Thread(target=service, args=(data,)).start()
+    threading.Thread(target=service2, args=(data,)).start()
+    threading.Thread(target=service3, args=(data,)).start()           
 
-    # Multiple services, each one accepting multiple clients rather than one service accepting multiple clients
-    # One socket listening at local port and another socket listening on another port to identify the wanted service
-
-    # Responsible for adding data
-    threading.Thread(target=service, args=(data,1,)).start()
-
-    # Responsible for removing data
-    threading.Thread(target=service, args=(data,2,)).start()
-
-    # Responsible for printing data
-    threading.Thread(target=service, args=(data,3,)).start()
-
-    
 if __name__ == '__main__':
     main()
