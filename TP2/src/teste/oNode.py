@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, timedelta
 import re
 import threading
 from time import sleep, perf_counter
@@ -157,19 +157,21 @@ def refresh(tabela, tempo_recebido, true_sender, n_saltos, timestamps, tree_back
     return tabela
 
 
-def mensagem(true_sender_id, sender_id, n_saltos, timestamps, tree_back_to_sender):
-    # timestamps - dicionario de (nodo: tempo) das mensagens recebidas
-    timestamps[my_id] = datetime.now()
+def forward_mensagem(true_sender, n_saltos, timestamps, tree_back_to_sender, is_server, is_bigNode):
+    timestamps.append(my_id, datetime.now())
 
-    # tree_back_to_sender - grafo de caminhos mais curtos
-
-    # adicionar my_id
-
-    return true_sender_id, my_id, n_saltos + 1, timestamps, tree_back_to_sender
+    new_tree = [my_id, tree_back_to_sender]
+    return true_sender, n_saltos + 1, timestamps, new_tree, is_server, is_bigNode
 
 
 def messageHandler():
     # flooding controlado
+    for i in local_info:
+        delta = datetime.now() - i['last_refresh']
+        expired = timedelta(minutes=1)
+        if delta > expired:
+            nodo = i['nodo']
+            # send to nodo mensagem
     pass
 
 
