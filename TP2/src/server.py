@@ -37,7 +37,7 @@ def service(data, typeService: int):
     else: # typeService == 3
         pass
     
-    if typeService == 1 or 2:
+    if typeService == 1 | typeService == 2:
         localIP = "10.0.0.10"   # ver qual é a porta do servidor
         localAddr = (localIP, localPort)
 
@@ -68,10 +68,9 @@ def service(data, typeService: int):
         # Close socket
         server.close()
 
-    else: # typeService == 3
+    elif typeService == 3: # typeService == 3
         while True:
             data.printNeighbors()
-
 
 def main():
 
