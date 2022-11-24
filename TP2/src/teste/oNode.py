@@ -1,3 +1,4 @@
+import datetime
 import re
 import threading
 from time import sleep, perf_counter
@@ -57,14 +58,47 @@ class interface:
 command = '[10.0.0.1 : 10.0.0.2 , 10.0.0.3] [10.0.0.2 : 10.0.0.3, 10.0.0.6]'
 
 my_id = 'oNode1'
-is_bigNode = True
+is_bigNode = False
 
 # vizinhos['NodoA'] = ['NodoB', 'NodoC']
 # (1,A), (A, B), (A, C)
-vizinhos = {}
+local_info_index = {
+    'C': 0,
+    'B': 1,
+    'A': 2,
+}
 
-# tabela['nodo'] = (tempo, ultima_atualização, is_server, is_bignode, fastest_path)
-local_info = {}
+# tabela[index] = (nodo, tempo, last_refresh, is_server, is_bigNode, fastest_path)
+local_info = [
+    {
+        'nodo':'C',
+        'tempo': 10,
+        'n_saltos': 2,
+        'last_refresh': datetime.now(),
+        'is_server': True,
+        'is_bigNode': False,
+        'fastest_path': ['A', 'C']
+    },
+    {
+        'nodo': 'B',
+        'tempo': 10,
+        'n_saltos': 2,
+        'last_refresh': datetime.now(),
+        'is_server': False,
+        'is_bigNode': False,
+        'fastest_path': ['A', 'B']
+    },
+    {
+        'nodo': 'A',
+        'tempo': 5,
+        'n_saltos': 1,
+        'last_refresh': datetime.now(),
+        'is_server': False,
+        'is_bigNode': True,
+        'fastest_path': ['A']
+    }
+]
+
 
 def overlayNetwork(command):
     nodes = []
@@ -91,12 +125,36 @@ def uiHandler():
         sleep(2)
 
 
-def refresh_table(tabela, mensagem):
+def refresh(tabela, tempo_recebido, true_sender, n_saltos, timestamps, tree_back_to_sender, is_server, is_bigNode):
+    nodo, tempo = timestamps[0]
+    delta = tempo_recebido - tempo
 
-    # if mensagem contem : menor tempo ? mudar tabela, manter
+    if true_sender in local_info_index:
+        sender_index = local_info_index[true_sender]
 
-    # if mensagem contem tempo igual : verificar numero de saltos
-    pass
+        # tabela[index] = (nodo, tempo, last_refresh, is_server, is_bigNode, fastest_path)
+        tabela[sender_index]['last_refresh'] = datetime.now()
+        if tabela[sender_index]['tempo'] > delta:
+            tabela[sender_index]['tempo'] = delta
+            tabela[sender_index]['fastest_path'] = tree_back_to_sender
+
+        elif tabela[sender_index]['tempo'] == delta & tabela[sender_index]['saltos'] >= n_saltos:
+            tabela[sender_index]['tempo'] = delta
+            tabela[sender_index]['fastest_path'] = tree_back_to_sender
+            tabela[sender_index]['saltos'] = n_saltos
+    else:
+        n = len(local_info_index)
+        local_info_index[true_sender] = n
+        tabela[n] = {
+            'nodo': true_sender,
+            'tempo': delta,
+            'saltos': n_saltos,
+            'last_refresh': datetime.now(),
+            'is_server': is_server,
+            'is_bigNode': is_bigNode,
+            'fastest_path': tree_back_to_sender
+        }
+    return tabela
 
 
 def mensagem(true_sender_id, sender_id, n_saltos, timestamps, tree_back_to_sender):
