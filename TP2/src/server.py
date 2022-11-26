@@ -1,75 +1,31 @@
-import socket
-import threading
-import time
-import database
+import sys, socket
 
-def processMessage(message, addr, server, data):
-    data.addNeighbor(addr)
-    server.sendto("Sucess!!".encode('utf-8'), addr)
+from ServerWorker import ServerWorker
 
-def processMessage2(message, addr, server, data):
-    data.removeNeighbor(addr)
-    server.sendto("Sucess!!".encode('utf-8'), addr)
+class server:	
+	
+	def main(self):
+		try:
+			SERVER_PORT = int(sys.argv[1])
+		except:
+			print("[Usage: Server.py Port]\n")
 
-def service(data):
-    server : socket.socket
-    localIP : str
-    localPort : int
-    message : bytes
-    add : tuple
+		SERVER_ADDR = "10.0.0.10"
+		rtspSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		rtspSocket.bind((SERVER_ADDR, SERVER_PORT))
+		print(f"Listening on {SERVER_ADDR}: {SERVER_PORT}")
+		rtspSocket.listen(5)        
 
-    server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    localIP = '10.0.0.10'
-    localPort = 3000
+		# Receive client info (address,port) through RTSP/TCP session
+		while True:
+			try:
+				clientInfo = {}
+				clientInfo['rtspSocket'] = rtspSocket.accept()  # clientInfo['rtspSocket'] = (clientConnection, clientAddress)
+				ServerWorker(clientInfo).run()
+			except Exception:
+				break
 
-    server.bind((localIP, localPort))
+		rtspSocket.close()
 
-    print(f"UDP server up and listening on {localIP}:{localPort}")
-
-    while True:
-        try:
-            message, add = server.recvfrom(1024)
-            threading.Thread(target=processMessage, args=(message, add, server, data)).start()         
-        except Exception:
-            break
-
-    server.close()
-
-def service2(data):
-    server : socket.socket
-    localIP : str
-    localPort : int
-    message : bytes
-    addr : tuple
-
-    server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    localIP = '10.0.0.10'
-    localPort = 3005
-
-    server.bind((localIP, localPort))
-
-    print(f"UDP server up and listening on {localIP}:{localPort}")
-
-    while True:
-        try:
-            message, addr = server.recvfrom(1024)
-            threading.Thread(target=processMessage2, args=(message, addr, server, data)).start()         
-        except Exception:
-            break
-
-    server.close()
-
-def service3(data):
-    while True:
-       data.show() 
-
-def main():
-    data : database.database
-
-    data = database.database()
-    threading.Thread(target=service, args=(data,)).start()
-    threading.Thread(target=service2, args=(data,)).start()
-    threading.Thread(target=service3, args=(data,)).start()           
-
-if __name__ == '__main__':
-    main()
+if __name__ == "__main__":
+	(server()).main()

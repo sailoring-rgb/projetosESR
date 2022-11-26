@@ -67,5 +67,3 @@ class RtpPacket:
 
 	def printheader(self):
 		print("[RTP Packet] Version: ...")
-
-
