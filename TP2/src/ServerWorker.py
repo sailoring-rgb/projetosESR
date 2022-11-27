@@ -57,11 +57,11 @@ class ServerWorker:
 		# Get the request type
 		request = (str(data)).splitlines()
 		print("request is --- " + str(request))
-		line1 = request[0].split(' ')
+		line1 = str(request[0]).split(' ')
 		print("line1 is --- " + line1)
-		requestType = line1[0]
+		requestType = str(line1[0])
 		print("requestType is --- " + requestType)
-		
+
 		# Get the media file name
 		filename = line1[1]
 		
