@@ -20,6 +20,7 @@ class Client:
 	TEARDOWN = 3
 	
 	hostname = socket.gethostname()
+	#host_ip = socket.gethostbyname(hostname)
 	
 	# Initiation..
 	def __init__(self, master, serveraddr, serverport, rtpport, filename):
@@ -152,7 +153,9 @@ class Client:
 			print('\nSETUP event\n')
 
 			# Write the RTSP request to be sent.
-			request = f"{self.SETUP} movie.Mjep\nsequenceNumber: {self.rtspSeq}\nrtspAddress: {self.hostname} rtspPort: {self.rtpPort}"
+			request = f"""{self.SETUP} movie.Mjeg
+sequenceNumber: {self.rtspSeq}
+hostname: {self.hostname}; rtspPort: {self.rtpPort}"""
 			
 			# Keep track of the sent request.
 			self.requestSent = self.SETUP
@@ -164,7 +167,9 @@ class Client:
 			print('\nPLAY event\n')
 			
 			# Write the RTSP request to be sent.
-			request = f"{self.PLAY} movie.Mjep\nsequenceNumber: {self.rtspSeq}\nrtspAddress: {self.hostname} rtspPort: {self.rtpPort}"
+			request = f"""{self.PLAY} movie.Mjeg
+sequenceNumber: {self.rtspSeq}
+hostname: {self.hostname}; rtspPort: {self.rtpPort}"""
 			
 			# Keep track of the sent request.
 			self.requestSent = self.PLAY
@@ -176,7 +181,9 @@ class Client:
 			print('\nPAUSE event\n')
 			
 			# Write the RTSP request to be sent.
-			request = f"{self.PAUSE} movie.Mjep\nsequenceNumber: {self.rtspSeq}\nrtspAddress: {self.hostname} rtspPort: {self.rtpPort}"
+			request = f"""{self.PAUSE} movie.Mjeg
+sequenceNumber: {self.rtspSeq}
+hostname: {self.hostname}; rtspPort: {self.rtpPort}"""
 			
 			# Keep track of the sent request.
 			self.requestSent = self.PAUSE
@@ -188,7 +195,9 @@ class Client:
 			print('\nTEARDOWN event\n')
 			
 			# Write the RTSP request to be sent.
-			request = f"{self.TEARDOWN} movie.Mjep\nsequenceNumber: {self.rtspSeq}\nrtspAddress: {self.hostname} rtspPort: {self.rtpPort}"
+			request = f"""{self.TEARDOWN} movie.Mjeg
+sequenceNumber: {self.rtspSeq}
+hostname: {self.hostname}; rtspPort: {self.rtpPort}"""
 			
 			# Keep track of the sent request.
 			self.requestSent = self.TEARDOWN

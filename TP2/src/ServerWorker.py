@@ -52,11 +52,15 @@ class ServerWorker:
 				fileName    : str
 				seqNumber   : int
 		"""
+		print(data)
 
 		# Get the request type
-		request = data.split('\n')
+		request = (str(data)).splitlines()
+		print("request is --- " + str(request))
 		line1 = request[0].split(' ')
+		print("line1 is --- " + line1)
 		requestType = line1[0]
+		print("requestType is --- " + requestType)
 		
 		# Get the media file name
 		filename = line1[1]
