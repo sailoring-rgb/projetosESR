@@ -197,7 +197,7 @@ class Client:
 		
 		# Send the RTSP request using rtspSocket.
 		destAddr = (self.serverAddr,self.serverPort)
-		self.rtpSocket.sendto(request.encode('utf-8'), destAddr)
+		self.rtspSocket.sendto(request.encode('utf-8'), destAddr)
 		
 		print('\nData sent: \n' + request)
 	

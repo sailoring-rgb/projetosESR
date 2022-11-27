@@ -13,7 +13,7 @@ if __name__ == "__main__":
 		print("[Usage: ClientLauncher.py Server_Addr Server_Port RTP_Port Video_file_Name]\n")	
 	
 	if os.environ.get('DISPLAY','') == '':
-		print('no display found. Using :0.0')
+		print('No display found... Using DISPLAY :0.0')
 		os.environ.__setitem__('DISPLAY', ':0.0')
 
 	root = Tk()
@@ -22,8 +22,8 @@ if __name__ == "__main__":
 	app = Client(root, serverAddr, serverPort, rtpPort, fileName)
 	app.master.title("RTPClient")
 
-	label1 = Tk.Label(app.master, text=f'Streaming {fileName}')
-	label1.pack()
-	
+	# label1 = Tk.Label(app.master, text=f'Streaming {fileName}')
+	# label1.pack()
+
 	root.mainloop()
 	
