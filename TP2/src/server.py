@@ -1,69 +1,31 @@
-import socket
-import threading
+import sys, socket
 
-def main():
-    server: socket.socket
-    localIP: str
-    localPort: int
-    message: bytes
-    localAddr: tuple
-    addr: tuple
+from ServerWorker import ServerWorker
 
-    localIP = "10.0.0.10"   # ver qual é a porta do servidor
-    localPort = 3001
-    localAddr = (localIP, localPort)
-    """
-    HEADER = 64
-    FORMAT = 'utf-8'
-    DISCONNECT_MESSAGE = "!DISCONNECT"
-    """
-    # Create a datagram socket
-    server = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+class server:	
+	
+	def main(self):
+		try:
+			SERVER_PORT = int(sys.argv[1])
+		except:
+			print("[Usage: Server.py Port]\n")
 
-    # Bind to address and ip
-    server.bind(localAddr)
+		SERVER_ADDR = "10.0.0.10"
+		rtspSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		rtspSocket.bind((SERVER_ADDR, SERVER_PORT))
+		print(f"Listening on {SERVER_ADDR}: {SERVER_PORT}")
+		rtspSocket.listen(5)        
 
-    # Address and Port Available if print happens
-    print(f'UDP server up and listening on {localIP}: {localPort}')
+		# Receive client info (address,port) through RTSP/TCP session
+		while True:
+			try:
+				clientInfo = {}
+				clientInfo['rtspSocket'] = rtspSocket.accept()  # clientInfo['rtspSocket'] = (clientConnection, clientAddress)
+				ServerWorker(clientInfo).run()
+			except Exception:
+				break
 
-    # Catch the message - returns message and the device's (ip,port) that sent this message
-    message, addr = server.recvfrom(1024)
-    
-    # Assure message was successfully received
-    print(f"Message {message.decode('utf-8')} received from {addr}")
+		rtspSocket.close()
 
-    # Send a response to the message received
-    server.sendto("Success!!".encode('utf-8'), addr)
-
-    # Close socket
-    server.close()
-
-
-if __name__ == '__main__':
-    main()
-
-"""
-def handle_client(conn, addr):
-    print(f'[NEW CONNECTION] {addr} connected.')
-    connected = True
-    while connected:
-        msg_length = conn.recv(HEADER).decode(FORMAT)
-        msg_length = int(msg_length)
-        msg = conn.recv(msg_length).decode(FORMAT)
-        if msg == DISCONNECT_MESSAGE:
-            connected = False
-        print(f'[{addr}] sent {msg}')
-    conn.close()
-
-
-def start():
-    print(f"[STARTING] server on {localPort} port.")
-    server.listen()
-    while True:
-        conn, addr = server.accept()
-        thread = threading.Thread(target=handleClient(conn, addr))
-        thread.start()
-        print(f'[ACTIVE CONNECTIONS] {threading.activeCount() - 1}')
-
-start()
-"""
+if __name__ == "__main__":
+	(server()).main()
