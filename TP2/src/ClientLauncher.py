@@ -7,8 +7,9 @@ if __name__ == "__main__":
 	try:
 		serverAddr = sys.argv[1]
 		serverPort = sys.argv[2]
-		rtpPort = sys.argv[3]
-		fileName = sys.argv[4]	
+		rtpAddress = sys.argv[3]
+		rtpPort = sys.argv[4]
+		fileName = sys.argv[5]	
 	except:
 		print("[Usage: ClientLauncher.py Server_Addr Server_Port RTP_Port Video_file_Name]\n")	
 	
@@ -19,7 +20,7 @@ if __name__ == "__main__":
 	root = Tk()
 	
 	# Create a new client
-	app = Client(root, serverAddr, serverPort, rtpPort, fileName)
+	app = Client(root, serverAddr, serverPort, rtpAddress, rtpPort, fileName)
 	app.master.title("RTPClient")
 
 	# label1 = Tk.Label(app.master, text=f'Streaming {fileName}')

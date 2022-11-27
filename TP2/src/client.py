@@ -20,15 +20,15 @@ class Client:
 	TEARDOWN = 3
 	
 	hostname = socket.gethostname()
-	#host_ip = socket.gethostbyname(hostname)
 	
 	# Initiation..
-	def __init__(self, master, serveraddr, serverport, rtpport, filename):
+	def __init__(self, master, serveraddr, serverport, rtpaddress, rtpport, filename):
 		self.master = master
 		self.master.protocol("WM_DELETE_WINDOW", self.handler)
 		self.createWidgets()
 		self.serverAddr = serveraddr
 		self.serverPort = int(serverport)
+		self.rtpAddress = rtpaddress
 		self.rtpPort = int(rtpport)
 		self.fileName = filename
 		self.rtspSeq = 0
@@ -153,9 +153,9 @@ class Client:
 			print('\nSETUP event\n')
 
 			# Write the RTSP request to be sent.
-			request = f"""{self.SETUP} movie.Mjeg
+			request = f"""SETUP {self.fileName}
 sequenceNumber: {self.rtspSeq}
-hostname: {self.hostname}; rtspPort: {self.rtpPort}"""
+hostname: {self.hostname} rtspPort: {self.rtpPort}"""
 			
 			# Keep track of the sent request.
 			self.requestSent = self.SETUP
@@ -167,9 +167,9 @@ hostname: {self.hostname}; rtspPort: {self.rtpPort}"""
 			print('\nPLAY event\n')
 			
 			# Write the RTSP request to be sent.
-			request = f"""{self.PLAY} movie.Mjeg
+			request = f"""PLAY {self.fileName}
 sequenceNumber: {self.rtspSeq}
-hostname: {self.hostname}; rtspPort: {self.rtpPort}"""
+hostname: {self.hostname} rtspPort: {self.rtpPort}"""
 			
 			# Keep track of the sent request.
 			self.requestSent = self.PLAY
@@ -181,9 +181,9 @@ hostname: {self.hostname}; rtspPort: {self.rtpPort}"""
 			print('\nPAUSE event\n')
 			
 			# Write the RTSP request to be sent.
-			request = f"""{self.PAUSE} movie.Mjeg
+			request = f"""PAUSE {self.fileName}
 sequenceNumber: {self.rtspSeq}
-hostname: {self.hostname}; rtspPort: {self.rtpPort}"""
+hostname: {self.hostname} rtspPort: {self.rtpPort}"""
 			
 			# Keep track of the sent request.
 			self.requestSent = self.PAUSE
@@ -195,9 +195,9 @@ hostname: {self.hostname}; rtspPort: {self.rtpPort}"""
 			print('\nTEARDOWN event\n')
 			
 			# Write the RTSP request to be sent.
-			request = f"""{self.TEARDOWN} movie.Mjeg
+			request = f"""TEARDOWN {self.fileName}
 sequenceNumber: {self.rtspSeq}
-hostname: {self.hostname}; rtspPort: {self.rtpPort}"""
+hostname: {self.hostname} rtspPort: {self.rtpPort}"""
 			
 			# Keep track of the sent request.
 			self.requestSent = self.TEARDOWN
@@ -270,8 +270,9 @@ hostname: {self.hostname}; rtspPort: {self.rtpPort}"""
 		self.rtpSocket.settimeout(0.5)
 		
 		try:
+
 			# Bind the socket to the address using the RTP port given by the client user
-			self.rtpSocket.bind((self.host_address, self.rtpPort))
+			self.rtpSocket.bind((self.rtpAddress, self.rtpPort))
 			print('\nBind \n')
 		except:
 			tkMessageBox.showwarning('Unable to Bind', 'Unable to bind PORT=%d' % self.rtpPort)
