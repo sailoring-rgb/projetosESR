@@ -2,10 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7b5cb967-367f-4a3e-b3ad-21cadadbf23d" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/img/classes.jpeg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/img/grafo_exemplo.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/teste/topologia.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/teste/loader.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/teste/loader.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/teste/oNode.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/teste/oNode.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -81,7 +78,7 @@
       <workItem from="1666869688438" duration="1822000" />
       <workItem from="1667473969050" duration="304000" />
       <workItem from="1667474280556" duration="12183000" />
-      <workItem from="1669833373481" duration="5721000" />
+      <workItem from="1669833373481" duration="6823000" />
     </task>
     <servers />
   </component>

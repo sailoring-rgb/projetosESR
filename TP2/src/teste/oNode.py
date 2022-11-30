@@ -52,25 +52,7 @@ local_info = [
 ]
 
 
-def overlayNetwork(command):
-    nodes = []
-    pairs = re.findall("(?:\[(.*?)\])", command)  # ['A:B,C', 'B:C', 'C:D,E']
-    neighbors = []  # [ (indA,indB,distanceAB), (indA,indB,distanceAC), (ind,C,distanceBC) ]
-    for p in pairs:
-        ips = re.split(r'\s*:\s*', p)  # 'C', 'D,E'
-        interf1 = interface(ips[0], [], [])
-        if not any(obj.ip == ips[0] for obj in nodes):
-            nodes.append(interf1)
-        ips2 = re.split(r'\s*,\s', ips[1])  # 'D', 'E'
-        for next in ips2:
-            interf2 = interface(next, [], [])
-            if not any(obj.ip == next for obj in nodes):
-                nodes.append(interf2)
-            neighbors.append((getIndex(nodes, interf1.ip), (getIndex(nodes, interf2.ip))))
-    return nodes, neighbors
-
-
-def uiHandler():
+def ui_handler():
     print('a iniciar client...')
     while (True):
         print('*doing client stuff*')
@@ -116,7 +98,7 @@ def forward_mensagem(true_sender, n_saltos, timestamps, tree_back_to_sender, is_
     return true_sender, n_saltos + 1, timestamps, new_tree, is_server, is_bigNode
 
 
-def messageHandler():
+def message_handler():
     # flooding controlado
     for i in local_info:
         delta = datetime.now() - i['last_refresh']
@@ -127,19 +109,19 @@ def messageHandler():
     pass
 
 
-def networkHandler():
+def network_handler():
     # recebe e passa informação
 
     # if is_bigNode : armazena tabela de ficheiros locais da sua subrede
     pass
 
 
-def serverHandler():
+def server_handler():
     print('a iniciar servidor servidor...')
-    refresh_table = threading.Thread(target=messageHandler, args=())
+    refresh_table = threading.Thread(target=message_handler, args=())
     refresh_table.start()
 
-    network = threading.Thread(target=networkHandler, args=())
+    network = threading.Thread(target=network_handler, args=())
     network.start()
 
     refresh_table.join()
@@ -154,10 +136,10 @@ end_time = perf_counter()
 print(f'It took {end_time - start_time: 0.2f} second(s) to complete.')
 threads = []
 
-media_player = threading.Thread(target=uiHandler, args=())
+media_player = threading.Thread(target=ui_handler, args=())
 media_player.start()
 
-servidor = threading.Thread(target=uiHandler, args=())
+servidor = threading.Thread(target=server_handler, args=())
 servidor.start()
 
 servidor.join()

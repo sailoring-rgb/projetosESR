@@ -1,0 +1,62 @@
+[
+  {
+        "nodo": "0",
+        "is_server": "True",
+        "is_bigNode": "False",
+        "fastest_path": []
+    },
+    {
+        "nodo": "1",
+        "is_server": "False",
+        "is_bigNode": "False",
+        "fastest_path": ["0"]
+    },
+    {
+        "nodo": "2",
+        "is_server": "False",
+        "is_bigNode": "False",
+        "fastest_path": ["1", "0"]
+    },
+    {
+        "nodo": "3",
+        "is_server": "False",
+        "is_bigNode": "False",
+        "fastest_path": ["1", "0"]
+    },
+    {
+        "nodo": "4",
+        "is_server": "False",
+        "is_bigNode": "False",
+        "fastest_path": ["3", "1", "0"]
+    },
+    {
+        "nodo": "5",
+        "is_server": "False",
+        "is_bigNode": "True",
+        "fastest_path": ["2", "1", "0"]
+    },
+    {
+        "nodo": "6",
+        "is_server": "False",
+        "is_bigNode": "False",
+        "fastest_path": ["5", "0"]
+    },
+    {
+        "nodo": "7",
+        "is_server": "False",
+        "is_bigNode": "False",
+        "fastest_path": ["5", "0"]
+    },
+    {
+        "nodo": "8",
+        "is_server": "False",
+        "is_bigNode": "False",
+        "fastest_path": ["7", "5", "0"]
+    },
+    {
+        "nodo": "9",
+        "is_server": "False",
+        "is_bigNode": "False",
+        "fastest_path": ["8", "7", "5", "0"]
+    }
+]
