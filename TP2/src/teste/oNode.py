@@ -6,14 +6,12 @@ from time import sleep, perf_counter
 
 # ----------------------- oNode -----------------------
 
-command = '[10.0.0.1 : 10.0.0.2 , 10.0.0.3] [10.0.0.2 : 10.0.0.3, 10.0.0.6]'
-
-my_id = 'oNode1'
+node_id = 'oNode1'
 is_bigNode = False
+is_server = False
 connections = {}
 
-# vizinhos['NodoA'] = ['NodoB', 'NodoC']
-# (1,A), (A, B), (A, C)
+
 local_info_index = {
     'C': 0,
     'B': 1,
@@ -92,10 +90,15 @@ def refresh(tabela, tempo_recebido, true_sender, n_saltos, timestamps, tree_back
 
 
 def forward_mensagem(true_sender, n_saltos, timestamps, tree_back_to_sender, is_server, is_bigNode):
-    timestamps.append(my_id, datetime.now())
+    timestamps.append(node_id, datetime.now())
 
-    new_tree = [my_id, tree_back_to_sender]
+    new_tree = [node_id, tree_back_to_sender]
     return true_sender, n_saltos + 1, timestamps, new_tree, is_server, is_bigNode
+
+
+def message():
+    # TODO enviar por UDP
+    return node_id, 1, [(node_id, datetime.now())], [node_id], is_server, is_bigNode
 
 
 def message_handler():
@@ -105,7 +108,8 @@ def message_handler():
         expired = timedelta(minutes=1)
         if delta > expired:
             nodo = i['nodo']
-            # send to nodo mensagem
+            # TODO enviar por UDP
+            message()
     pass
 
 

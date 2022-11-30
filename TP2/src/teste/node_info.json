@@ -1,5 +1,6 @@
 {
   "node_id": "",
   "is_bigNode": "False",
-  "is_server": "False"
+  "is_server": "False",
+  "connections": ["A", "B"]
 }
