@@ -1,53 +1,38 @@
+import json
 from datetime import datetime, timedelta
-import re
 import threading
-from time import sleep, perf_counter
-
+from time import sleep
+import sys
 
 # ----------------------- oNode -----------------------
 
-node_id = 'oNode1'
-is_bigNode = False
-is_server = False
-connections = {}
+id = str(sys.argv)[0]
 
+c = open(f'topologia{id}.json')
+i = open(f'node_info{id}.json')
 
-local_info_index = {
-    'C': 0,
-    'B': 1,
-    'A': 2,
-}
+connections = json.load(c)
+info = json.load(i)
 
-# tabela[index] = (nodo, tempo, last_refresh, is_server, is_bigNode, fastest_path)
-local_info = [
-    {
-        'nodo': 'C',
-        'tempo': 10,
-        'n_saltos': 2,
+node_id = info['node_id']
+is_bigNode = info['is_bigNode']
+is_server = info['is_server']
+
+local_info_index = {}
+local_info = []
+
+for dados in info:
+    n = len(local_info_index)
+    local_info_index[dados['node_id']] = n
+    local_info[n] = {
+        'nodo': dados['node_id'],
+        'tempo': 1,
+        'saltos': len(dados['fastest_path']),
         'last_refresh': datetime.now(),
-        'is_server': True,
-        'is_bigNode': False,
-        'fastest_path': ['A', 'C']
-    },
-    {
-        'nodo': 'B',
-        'tempo': 10,
-        'n_saltos': 2,
-        'last_refresh': datetime.now(),
-        'is_server': False,
-        'is_bigNode': False,
-        'fastest_path': ['A', 'B']
-    },
-    {
-        'nodo': 'A',
-        'tempo': 5,
-        'n_saltos': 1,
-        'last_refresh': datetime.now(),
-        'is_server': False,
-        'is_bigNode': True,
-        'fastest_path': ['A']
+        'is_server': dados['is_server'],
+        'is_bigNode': dados['is_bigNode'],
+        'fastest_path': dados['fastest_path']
     }
-]
 
 
 def ui_handler():
@@ -132,12 +117,6 @@ def server_handler():
     network.join()
 
 
-start_time = perf_counter()
-
-# task goes here
-
-end_time = perf_counter()
-print(f'It took {end_time - start_time: 0.2f} second(s) to complete.')
 threads = []
 
 media_player = threading.Thread(target=ui_handler, args=())
