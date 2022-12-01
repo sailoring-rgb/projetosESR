@@ -9,8 +9,8 @@ file_id = str(sys.argv)[0]
 c = open(f'topologia{file_id}.json')
 i = open(f'node_info{file_id}.json')
 
-connections = json.load(c)
 info = json.load(i)
+connections = json.load(c)
 
 node_id = info['node_id']
 is_bigNode = info['is_bigNode']
@@ -74,7 +74,7 @@ def refresh(tabela, tempo_recebido, true_sender, n_saltos, timestamps, tree_back
 
 def forward_mensagem(true_sender, n_saltos, timestamps, tree_back_to_sender, is_server, is_bigNode):
     timestamps.append(node_id, datetime.now())
-
+    # TODO flooding controlado ver quem já recebeu
     new_tree = [node_id, tree_back_to_sender]
     return true_sender, n_saltos + 1, timestamps, new_tree, is_server, is_bigNode
 
