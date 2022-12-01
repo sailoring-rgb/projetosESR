@@ -4,12 +4,10 @@ import threading
 from time import sleep
 import sys
 
-# ----------------------- oNode -----------------------
+file_id = str(sys.argv)[0]
 
-id = str(sys.argv)[0]
-
-c = open(f'topologia{id}.json')
-i = open(f'node_info{id}.json')
+c = open(f'topologia{file_id}.json')
+i = open(f'node_info{file_id}.json')
 
 connections = json.load(c)
 info = json.load(i)
@@ -95,7 +93,6 @@ def message_handler():
             nodo = i['nodo']
             # TODO enviar por UDP
             message()
-    pass
 
 
 def network_handler():
