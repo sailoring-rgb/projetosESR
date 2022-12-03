@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 import threading
 from time import sleep
 import sys
+import socket
 
 file_id = str(sys.argv)[0]
 
@@ -79,20 +80,43 @@ def forward_mensagem(true_sender, n_saltos, timestamps, tree_back_to_sender, is_
     return true_sender, n_saltos + 1, timestamps, new_tree, is_server, is_bigNode
 
 
-def message():
-    # TODO enviar por UDP
-    return node_id, 1, [(node_id, datetime.now())], [node_id], is_server, is_bigNode
+def handler_answer(sock):
+    done = False
+    while not done:
+        # receive incoming packets
+        data, address = sock.recvfrom(4096)
+
+        # print the received data and address
+        print(f"Message {data.decode('utf-8')} received from {address}")
+        done = True
+    sock.close()
+
+
+def message(ip, port):
+    sock = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+    send_to = (ip, port)
+    message_ = f'{node_id}, {1}, {[(node_id, datetime.now())]}, {[node_id]}, {is_server}, {is_bigNode}'
+
+    sock.sendto(message_.encode('utf-8'), send_to)
+    handler_answer(sock)
+
+
+def message_worker(entry):
+    delta = datetime.now() - entry['last_refresh']
+    expired = timedelta(minutes=2)
+    if delta > expired:
+        nodo = entry['nodo']
+        message(nodo, 5555)
 
 
 def message_handler():
-    # flooding controlado
-    for i in local_info:
-        delta = datetime.now() - i['last_refresh']
-        expired = timedelta(minutes=1)
-        if delta > expired:
-            nodo = i['nodo']
-            # TODO enviar por UDP
-            message()
+    messages_threads = []
+    for entry in local_info:
+        thread = threading.Thread(target=message_worker, args=(entry,))
+        thread.start()
+        messages_threads.append(thread)
+    for thread in messages_threads:
+        thread.join()
 
 
 def network_handler():
@@ -112,6 +136,8 @@ def server_handler():
 
     refresh_table.join()
     network.join()
+
+# ----------------------- oNode.py -----------------------
 
 
 threads = []
