@@ -43,16 +43,6 @@ class ServerWorker:
 	def processRtspRequest(self, data):
 		"""Process RTSP request sent from the client."""
 
-		""" data is something like:
-				requestType fileName
-				sequenceNumber: seqNumber
-				hostname: hostname rtspPort: port
-			where:
-				requestType = 'SETUP' | 'PLAY' | 'PAUSE' | 'TEARDOWN'
-				fileName    : str
-				seqNumber   : int
-		"""
-
 		# Get the request type
 		request = (str(data)).splitlines()
 		line1 = (str(request[0])).split()
@@ -141,9 +131,6 @@ class ServerWorker:
 					self.clientInfo['rtpSocket'].sendto(self.makeRtp(data, frameNumber),(address,port))
 				except:
 					print("Connection Error!!")
-					#print('-'*60)
-					#traceback.print_exc(file=sys.stdout)
-					#print('-'*60)
 
 	def makeRtp(self, payload, frameNbr):
 		"""RTP-packetize the video data."""
