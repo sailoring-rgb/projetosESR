@@ -2,8 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7b5cb967-367f-4a3e-b3ad-21cadadbf23d" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/teste/ack.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/teste/bfs.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/teste/bfs.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -86,7 +85,7 @@
       <workItem from="1670083856194" duration="2622000" />
       <workItem from="1670114047191" duration="795000" />
       <workItem from="1670188750118" duration="1654000" />
-      <workItem from="1670245092291" duration="1310000" />
+      <workItem from="1670245092291" duration="2004000" />
     </task>
     <servers />
   </component>
