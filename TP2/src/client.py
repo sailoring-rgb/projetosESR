@@ -2,14 +2,17 @@ import sys
 from tkinter import Tk
 from ClientWorker import ClientWorker
 import os
+import re
 
 if __name__ == "__main__":
+	current_pwd_path = os.path.dirname(os.path.abspath(__file__))
+	video_pwd_path = (re.findall("(?:(.*?)src)",current_pwd_path))[0]
 	try:
 		serverAddr = sys.argv[1]
 		serverPort = sys.argv[2]
 		rtpAddress = sys.argv[3]
 		rtpPort = sys.argv[4]
-		fileName = sys.argv[5]	
+		fileName = os.path.join(video_pwd_path,"video/"+str(sys.argv[5]))
 	except:
 		print("[Usage: ClientLauncher.py Server_Addr Server_Port RTP_Port Video_file_Name]\n")	
 	

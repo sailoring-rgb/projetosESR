@@ -1,13 +1,10 @@
-import os
-
 class VideoStream:
     
 	filename : str
 	frameNum : int
     
 	def __init__(self, filename):
-		pwd_path = os.path.dirname(os.path.abspath(__file__))
-		self.filename = os.path.join(pwd_path,str(filename))
+		self.filename = filename
 		try:
 			self.file = open(self.filename, 'rb')
 		except:
