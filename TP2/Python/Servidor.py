@@ -8,12 +8,8 @@ from RtpPacket import RtpPacket
 
 class Servidor:	
 
-	filename: str
-	clientInfo: dict
-
 	clientInfo = {}
-	
-		
+
 	def sendRtp(self):
 		"""Send RTP packets over UDP."""
 		while True:
@@ -23,9 +19,9 @@ class Servidor:
 			if self.clientInfo['event'].isSet():
 				break
 				
-			data = self.clientInfo['streaming'].nextFrame()
+			data = self.clientInfo['videoStream'].nextFrame()
 			if data:
-				frameNumber = self.clientInfo['streaming'].frameNbr()
+				frameNumber = self.clientInfo['videoStream'].frameNbr()
 				try:
 					address = self.clientInfo['rtpAddr']
 					port = int(self.clientInfo['rtpPort'])
@@ -36,12 +32,10 @@ class Servidor:
 					print('-'*60)
 					traceback.print_exc(file=sys.stdout)
 					print('-'*60)
-
 		# Close the RTP socket
 		self.clientInfo['rtpSocket'].close()
 		print("All done!")
 
-		
 	def makeRtp(self, payload, frameNbr):
 		"""RTP-packetize the video data."""
 		version = 2
@@ -71,12 +65,12 @@ class Servidor:
 			filename = "movie.Mjpeg"
 			print("Using default video file ->  " + filename)
 
-		# streamer
-		self.clientInfo['streaming'] = VideoStream(filename)
+		# videoStram
+		self.clientInfo['videoStream'] = VideoStream(filename)
 		# socket
 		self.clientInfo['rtpPort'] = 25000
 		self.clientInfo['rtpAddr'] = socket.gethostbyname('127.0.0.1')
-		print("Sending to Addr: " + self.clientInfo['rtpAddr'] + ":" + str(self.clientInfo['rtpPort']))
+		print("Sending to Addr:" + self.clientInfo['rtpAddr'] + ":" + str(self.clientInfo['rtpPort']))
 		# Create a new socket for RTP/UDP
 		self.clientInfo["rtpSocket"] = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		self.clientInfo['event'] = threading.Event()
