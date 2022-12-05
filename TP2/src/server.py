@@ -1,5 +1,5 @@
 import sys, socket
-
+import threading
 from ServerWorker import ServerWorker
 
 class server:	
@@ -21,7 +21,7 @@ class server:
 			try:
 				clientInfo = {}
 				clientInfo['rtspSocket'] = rtspSocket.accept()  # clientInfo['rtspSocket'] = (clientConnection, clientAddress)
-				ServerWorker(clientInfo).run()
+				threading.Thread(target=ServerWorker(clientInfo).run, args=()).start() 
 			except Exception:
 				break
 
