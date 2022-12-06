@@ -8,7 +8,7 @@ from RtpPacket import RtpPacket
 CACHE_FILE_NAME = "cache-"
 CACHE_FILE_EXT = ".jpg"
 
-class ClientWorker:
+class ClientStreamer:
 	INIT = 0
 	READY = 1
 	PLAYING = 2
