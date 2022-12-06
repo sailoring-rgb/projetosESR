@@ -1,25 +1,8 @@
 import sys, socket
 import threading
-from ServerWorker import ServerWorker
-
-
-def streamVideoAudio(rtspSocket):
-	# Receive client info (address,port) through RTSP/TCP session
-	while True:
-		try:
-			clientInfo = {}
-			clientInfo['rtspSocket'] = rtspSocket.accept()  # clientInfo['rtspSocket'] = (clientConnection, clientAddress)
-			ServerWorker(clientInfo).run()
-		except Exception:
-			break
-
-
-def streamText():
-	pass
-
+from ServerStreamer import ServerStreamer
 
 if __name__ == "__main__":
-
 	try:
 		SERVER_PORT = int(sys.argv[1])
 	except:
@@ -36,7 +19,7 @@ if __name__ == "__main__":
 		try:
 			clientInfo = {}
 			clientInfo['rtspSocket'] = rtspSocket.accept()  # clientInfo['rtspSocket'] = (clientConnection, clientAddress)
-			threading.Thread(target=ServerWorker(clientInfo).run, args=()).start() 
+			ServerStreamer(clientInfo).run()
 		except Exception:
 			break
 

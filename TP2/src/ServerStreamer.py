@@ -4,7 +4,7 @@ import sys, traceback, threading, socket
 from VideoStream import VideoStream
 from RtpPacket import RtpPacket
 
-class ServerWorker:
+class ServerStreamer:
 	# Requests
 	SETUP = 'SETUP'
 	PLAY = 'PLAY'

@@ -1,7 +1,7 @@
 class VideoStream:
     
-	filename : str
-	frameNum : int
+	filename: str
+	frameNum: int
     
 	def __init__(self, filename):
 		self.filename = filename
