@@ -1,0 +1,6 @@
+{
+  "node_id": "10.0.0.20",
+  "is_bigNode": "False",
+  "is_server": "False",
+  "connections": ["10.0.0.10","10.0.1.21","10.0.1.22"]
+}
