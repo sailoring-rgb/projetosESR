@@ -1,5 +1,6 @@
-import sys, socket
-import threading
+import socket
+import sys
+
 from ServerStreamer import ServerStreamer
 
 if __name__ == "__main__":
@@ -17,8 +18,7 @@ if __name__ == "__main__":
 	# Receive client info (address,port) through RTSP/TCP session
 	while True:
 		try:
-			clientInfo = {}
-			clientInfo['rtspSocket'] = rtspSocket.accept()  # clientInfo['rtspSocket'] = (clientConnection, clientAddress)
+			clientInfo = {'rtspSocket': rtspSocket.accept()}
 			ServerStreamer(clientInfo).run()
 		except Exception:
 			break

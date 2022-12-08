@@ -1,6 +1,7 @@
 import time
 import threading
 
+
 class database:
     count: int
     neighbors: dict
@@ -16,19 +17,19 @@ class database:
     def addNeighbor(self, addr: tuple):
         self.lock.acquire()
         self.neighbors[addr[0]] = self.count
-        self.count+=1
+        self.count += 1
         self.lock.release()
-    
+
     def removeNeighbor(self, addr: tuple):
         self.lock.acquire()
         self.neighbors.pop(addr[0])
-        self.count-=1
+        self.count -= 1
         self.lock.release()
-    
+
     def printNeighbors(self):
         self.lock.acquire()
         print(f"I have {self.count} neighbors")
-        for key,value in self.neighbors.items():
+        for key, value in self.neighbors.items():
             print(f"    My neighbor {key} is the number {value}")
             time.sleep(2)
         self.lock.release()

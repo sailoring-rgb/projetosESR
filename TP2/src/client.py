@@ -1,5 +1,8 @@
-import sys, re, os, socket
+import os
+import re
+import sys
 from tkinter import Tk
+
 from ClientStreamer import ClientStreamer
 
 
@@ -25,7 +28,7 @@ if __name__ == "__main__":
 	except:
 		print("[Usage: ClientLauncher.py Type_Stream Server_Addr Server_Port RTP_Port]\n")	
 	
-	if os.environ.get('DISPLAY','') == '':
+	if os.environ.get('DISPLAY', '') == '':
 		print('No display found... Using DISPLAY :0.0\n')
 		os.environ.__setitem__('DISPLAY', ':0.0')
 

@@ -1,7 +1,10 @@
-from tkinter import *
+import os
+import socket
+import threading
 import tkinter.messagebox as tkMessageBox
+from tkinter import *
+
 from PIL import Image, ImageTk
-import socket, threading, sys, traceback, os
 
 from RtpPacket import RtpPacket
 
