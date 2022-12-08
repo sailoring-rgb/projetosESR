@@ -27,17 +27,17 @@ local_info_index = {}
 local_info = []
 
 # DONE
-for dados in info:
+for data in info:
     n = len(local_info_index)
-    local_info_index[dados['node_id']] = n
+    local_info_index[data['node_id']] = n
     local_info[n] = {
-        'nodo': dados['node_id'],
+        'nodo': data['node_id'],
         'tempo': 1,
-        'saltos': len(dados['fastest_path']),
+        'saltos': len(data['fastest_path']),
         'last_refresh': datetime.now(),
-        'is_server': dados['is_server'],
-        'is_bigNode': dados['is_bigNode'],
-        'fastest_path': dados['fastest_path']
+        'is_server': data['is_server'],
+        'is_bigNode': data['is_bigNode'],
+        'fastest_path': data['fastest_path']
     }
 
 
@@ -47,10 +47,10 @@ def nearest_big_node():
 
 
 def ui_handler():
-    print('a iniciar client...')
+    print('A iniciar cliente...')
     while (True):
         if os.environ.get('DISPLAY', '') == '':
-            print('No display found... Using DISPLAY :0.0\n')
+            print('Nenhum display encontrado... Usando DISPLAY :0.0\n')
             os.environ.__setitem__('DISPLAY', ':0.0')
 
         current_pwd_path = os.path.dirname(os.path.abspath(__file__))
@@ -71,53 +71,53 @@ def ui_handler():
         sleep(2)
 
 
-def refresh(tabela, tempo_recebido, true_sender, n_saltos, timestamps, tree_back_to_sender, is_server, is_bigNode):
-    nodo, tempo = timestamps[0]
-    delta = tempo_recebido - tempo
+def refresh(table, time_received, true_sender, num_hops, timestamps, tree_back_to_sender, is_server, is_bigNode):
+    node, time = timestamps[0]
+    delta = time_received - time
 
     if true_sender in local_info_index:
         sender_index = local_info_index[true_sender]
 
-        # tabela[index] = (nodo, tempo, last_refresh, is_server, is_bigNode, fastest_path)
-        tabela[sender_index]['last_refresh'] = datetime.now()
-        if tabela[sender_index]['tempo'] > delta:
-            tabela[sender_index]['tempo'] = delta
-            tabela[sender_index]['fastest_path'] = tree_back_to_sender
+        # table[index] = (node, time, last_refresh, is_server, is_bigNode, fastest_path)
+        table[sender_index]['last_refresh'] = datetime.now()
+        if table[sender_index]['tempo'] > delta:
+            table[sender_index]['tempo'] = delta
+            table[sender_index]['fastest_path'] = tree_back_to_sender
 
-        elif tabela[sender_index]['tempo'] == delta & tabela[sender_index]['saltos'] >= n_saltos:
-            tabela[sender_index]['tempo'] = delta
-            tabela[sender_index]['fastest_path'] = tree_back_to_sender
-            tabela[sender_index]['saltos'] = n_saltos
+        elif table[sender_index]['tempo'] == delta & table[sender_index]['saltos'] >= num_hops:
+            table[sender_index]['tempo'] = delta
+            table[sender_index]['fastest_path'] = tree_back_to_sender
+            table[sender_index]['saltos'] = num_hops
     else:
         n = len(local_info_index)
         local_info_index[true_sender] = n
-        tabela[n] = {
+        table[n] = {
             'nodo': true_sender,
             'tempo': delta,
-            'saltos': n_saltos,
+            'saltos': num_hops,
             'last_refresh': datetime.now(),
             'is_server': is_server,
             'is_bigNode': is_bigNode,
             'fastest_path': tree_back_to_sender
         }
-    return tabela
+    return table
 
 
-def forward_mensagem(true_sender, n_saltos, timestamps, tree_back_to_sender, is_server, is_bigNode):
+def forward_message(true_sender, num_hops, timestamps, tree_back_to_sender, is_server, is_bigNode):
     timestamps.append(node_id, datetime.now())
     # TODO flooding controlado ver quem já recebeu
     new_tree = [node_id, tree_back_to_sender]
-    return true_sender, n_saltos + 1, timestamps, new_tree, is_server, is_bigNode
+    return true_sender, num_hops + 1, timestamps, new_tree, is_server, is_bigNode
 
 
 def handler_answer(sock):
     done = False
     while not done:
         # receive incoming packets
-        data, address = sock.recvfrom(4096)
+        dataRec, address = sock.recvfrom(4096)
 
         # print the received data and address
-        print(f"Message {data.decode('utf-8')} received from {address}")
+        print(f"A mensagem {dataRec.decode('utf-8')} foi recebida a partir de {address}")
         done = True
     sock.close()
 
@@ -135,8 +135,8 @@ def message_worker(entry):
     delta = datetime.now() - entry['last_refresh']
     expired = timedelta(minutes=2)
     if delta > expired:
-        nodo = entry['nodo']
-        message(nodo, 5555)
+        node = entry['nodo']
+        message(node, 5555)
 
 
 def message_handler():
@@ -152,7 +152,7 @@ def message_handler():
 def port_handler(port):
     rtsp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     rtsp_socket.bind((node_id, port))
-    print(f"Listening on {node_id}: {port}")
+    print(f"À escuta em {node_id}: {port}")
     rtsp_socket.listen(5)
 
     # Receive client info (address,port) through RTSP/TCP session
@@ -171,8 +171,8 @@ def network_handler():
     ports_threads = []
 
     for port in ports:
-        porta = port.get(1)
-        thread = threading.Thread(target=port_handler, args=(porta,))
+        port_aux = port.get(1)
+        thread = threading.Thread(target=port_handler, args=(port_aux,))
         thread.start()
         ports_threads.append(thread)
     for thread in ports_threads:
@@ -181,7 +181,7 @@ def network_handler():
 
 
 def server_handler():
-    print('a iniciar servidor servidor...')
+    print('A iniciar servidor...')
     refresh_table = threading.Thread(target=message_handler, args=())
     refresh_table.start()
 
@@ -191,6 +191,7 @@ def server_handler():
     refresh_table.join()
     network.join()
 
+
 # ----------------------- oNode.py -----------------------
 
 
@@ -199,8 +200,8 @@ threads = []
 media_player = threading.Thread(target=ui_handler, args=())
 media_player.start()
 
-servidor = threading.Thread(target=server_handler, args=())
-servidor.start()
+server = threading.Thread(target=server_handler, args=())
+server.start()
 
-servidor.join()
+server.join()
 media_player.join()
