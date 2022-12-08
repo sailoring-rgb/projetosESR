@@ -1,0 +1,62 @@
+[
+  {
+        "nodo": "10.0.0.10",
+        "is_server": "True",
+        "is_bigNode": "False",
+        "fastest_path": ["10.0.0.10","10.0.0.20"]
+    },
+    {
+        "nodo": "10.0.0.20",
+        "is_server": "False",
+        "is_bigNode": "False",
+        "fastest_path": ["10.0.0.20"]
+    },
+    {
+        "nodo": "10.0.1.22",
+        "is_server": "False",
+        "is_bigNode": "True",
+        "fastest_path": ["10.0.1.22"]
+    },
+    {
+        "nodo": "10.0.1.21",
+        "is_server": "False",
+        "is_bigNode": "False",
+        "fastest_path": ["10.0.1.21"]
+    },
+    {
+        "nodo": "10.0.1.23",
+        "is_server": "False",
+        "is_bigNode": "False",
+        "fastest_path": ["10.0.1.23"]
+    },
+    {
+        "nodo": "10.0.3.20",
+        "is_server": "False",
+        "is_bigNode": "True",
+        "fastest_path": ["10.0.3.20"]
+    },
+    {
+        "nodo": "10.0.3.21",
+        "is_server": "False",
+        "is_bigNode": "False",
+        "fastest_path": ["10.0.3.21"]
+    },
+    {
+        "nodo": "10.0.2.20",
+        "is_server": "False",
+        "is_bigNode": "False",
+        "fastest_path": ["10.0.2.20"]
+    },
+    {
+        "nodo": "10.0.2.21",
+        "is_server": "False",
+        "is_bigNode": "False",
+        "fastest_path": ["10.0.2.21"]
+    },
+    {
+        "nodo": "10.0.2.22",
+        "is_server": "False",
+        "is_bigNode": "False",
+        "fastest_path": ["10.0.2.22"]
+    }
+]
