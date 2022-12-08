@@ -50,7 +50,8 @@ class ServerStreamer:
 
 		# Get the media file name
 		filename = str(line1[1])
-
+		self.clientInfo['fileName'] = filename
+		
 		# Get the RTSP sequence number 
 		seq = int(((str(request[1])).split())[1])
 
