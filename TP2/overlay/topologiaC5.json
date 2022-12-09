@@ -1,6 +1,5 @@
 {
     "nodo": "10.0.3.20",
     "is_server": "False",
-    "is_bigNode": "True",
-    "fastest_path": ["10.0.3.20"]
+    "is_bigNode": "True"
 }
