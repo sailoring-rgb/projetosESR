@@ -42,15 +42,16 @@ message = {
 # ----------------------- messages.py -----------------------
 
 # DONE
+
 for dados in info:
     n = {
-        'nodo': dados['node_id'],
+        'nodo': data['node_id'],
         'tempo': 1,
-        'saltos': len(dados['fastest_path']),
+        'saltos': len(data['fastest_path']),
         'last_refresh': datetime.now(),
-        'is_server': dados['is_server'],
-        'is_bigNode': dados['is_bigNode'],
-        'fastest_path': dados['fastest_path']
+        'is_server': data['is_server'],
+        'is_bigNode': data['is_bigNode'],
+        'fastest_path': data['fastest_path']
     }
     local_info.append(n)
 
@@ -149,6 +150,16 @@ def listening():
     for node in ports:
         t = threading.Thread(target=listen_to, args=(node,))
         t.start()
+
+        server_addr, server_port = nearest_big_node()
+
+        rtp_address, rtp_port = (node_id, server_port)
+
+        # Create a new client
+        app = ClientStreamer(root, server_addr, server_port, rtp_address, rtp_port, path_to_filename)
+        app.master.title("RTP Client")
+        root.mainloop()
+        sleep(2)
 
 
 def message_handler():
