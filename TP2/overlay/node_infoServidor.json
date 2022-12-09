@@ -1,5 +1,9 @@
 {
     "node_id": "10.0.0.10",
+    "my_port": "3000",
+    "ports": [
+                {"ip": "10.0.0.20", "port": "3005"}
+            ],
     "is_bigNode": "False",
     "is_server": "True",
     "connections": ["10.0.0.20"]
