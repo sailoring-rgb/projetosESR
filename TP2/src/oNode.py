@@ -87,12 +87,13 @@ def refresh():
 
 # ----------------------- receber mensagens -----------------------
 
-
 def check_and_register(m):
     if m['is_server'] or m['is_big_node']:
         delta = m['tempo'][1]
 
-        if not message['nearest_server'] or message['nearest_server'][0][1] >= (m['nearest_server'][0][1] + delta):
+        if not message['nearest_server'] or (message['nearest_server'][0][1] >= (m['nearest_server'][0][1] + delta)
+                                             or (message['nearest_server'][0][1] == m['nearest_server'][0][1]
+                                                 + delta and m['saltos'] < message['saltos'])):
             message['nearest_server'] = [(m['nodo'], m['tempo'][0] + delta)]
 
 
@@ -106,19 +107,18 @@ def receive_message(m):
     if m['saltos'] >= max_hops:
         return
 
+    # Se o nodo da mensagem já está na tabela local, atualiza
+    if any(msg['nodo'] == m['nodo'] for msg in local_info):
+        existing_message = next(msg for msg in local_info if msg['nodo'] == m['nodo'])
+        existing_message.update(m)
+        existing_message['last_refresh'] = datetime.time()
+    else:
+        m['saltos'] += 1
+        m['last_refresh'] = datetime.time()
+        local_info.append(m)
+
     # Verifica e Regista a informação do nodo na lista de servidores mais próximos
     check_and_register(m)
-
-    # Se o nodo da mensagem não está na tabela local, adiciona e atualiza
-    if m not in local_info:
-        m['saltos'] += 1
-        m['last_refresh'] = time.time()
-
-        # set the appropriate flags in the message
-        m['is_server'] = is_server
-        m['is_big_node'] = is_bigNode
-
-        local_info.append(m)
 
     flood()
 
