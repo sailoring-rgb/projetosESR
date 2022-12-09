@@ -2,15 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7b5cb967-367f-4a3e-b3ad-21cadadbf23d" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/final/RtpPacket.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/final/ServerStreamer.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/final/VideoStream.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/final/clientStreamer.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/final/flooding.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/final/oNode.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/RtpPacket.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/RtpPacket.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/server.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/server.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -46,13 +38,16 @@
     &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;last_opened_file_path&quot;: &quot;E:/GIT/projetosESR/tp2/src/final&quot;,
+    &quot;last_opened_file_path&quot;: &quot;E:/GIT/projetosESR/tp2&quot;,
     &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;
   }
 }</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="E:\GIT\projetosESR\tp2\src\final" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="E:\GIT\projetosESR\tp2\src\final\Streaming" />
     </key>
   </component>
   <component name="RunManager">
@@ -101,6 +96,7 @@
       <workItem from="1670245092291" duration="2004000" />
       <workItem from="1670255322761" duration="26000" />
       <workItem from="1670499098596" duration="3220000" />
+      <workItem from="1670518123898" duration="10788000" />
     </task>
     <servers />
   </component>

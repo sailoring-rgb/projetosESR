@@ -41,34 +41,35 @@ def ui_handler():
         sleep(2)
 
 
-def refresh(tabela, tempo_recebido, true_sender, n_saltos, timestamps, tree_back_to_sender, is_server, is_bigNode):
-    nodo, tempo = timestamps[0]
-    delta = tempo_recebido - tempo
+# m = {tempo_recebido, true_sender, n_saltos, timestamps, tree_back_to_sender, is_server, is_bigNode}
+def refresh(tabela, m):
+    nodo, tempo = m['timestamps'][0]
+    delta = m['tempo_recebido'] - tempo
 
-    if true_sender in local_info_index:
-        sender_index = local_info_index[true_sender]
+    if m['true_sender'] in local_info_index:
+        sender_index = local_info_index[m['true_sender']]
 
         # tabela[index] = (nodo, tempo, last_refresh, is_server, is_bigNode, fastest_path)
         tabela[sender_index]['last_refresh'] = datetime.now()
         if tabela[sender_index]['tempo'] > delta:
             tabela[sender_index]['tempo'] = delta
-            tabela[sender_index]['fastest_path'] = tree_back_to_sender
+            tabela[sender_index]['fastest_path'] = m['tree_back_to_sender']
 
-        elif tabela[sender_index]['tempo'] == delta & tabela[sender_index]['saltos'] >= n_saltos:
+        elif tabela[sender_index]['tempo'] == delta & tabela[sender_index]['saltos'] >= m['n_saltos']:
             tabela[sender_index]['tempo'] = delta
-            tabela[sender_index]['fastest_path'] = tree_back_to_sender
-            tabela[sender_index]['saltos'] = n_saltos
+            tabela[sender_index]['fastest_path'] = m['tree_back_to_sender']
+            tabela[sender_index]['saltos'] = m['n_saltos']
     else:
-        n = len(local_info_index)
-        local_info_index[true_sender] = n
-        tabela[n] = {
-            'nodo': true_sender,
+        n_ = len(local_info_index)
+        local_info_index[m['true_sender']] = n_
+        tabela[n_] = {
+            'nodo': m['true_sender'],
             'tempo': delta,
-            'saltos': n_saltos,
+            'saltos': m['n_saltos'],
             'last_refresh': datetime.now(),
             'is_server': is_server,
             'is_bigNode': is_bigNode,
-            'fastest_path': tree_back_to_sender
+            'fastest_path': m['tree_back_to_sender']
         }
     return tabela
 
