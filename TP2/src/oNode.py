@@ -4,6 +4,7 @@ import threading
 import sys
 import socket
 import time
+import struct
 
 from src.handlers.client import ui_handler
 from src.handlers.server import server_handler
@@ -33,7 +34,7 @@ max_hops = 20
 message = {
     'nodo': node_id,
     'port': my_port,
-    'tempo': datetime.time(),
+    'tempo': [datetime.time()],
     'saltos': 0,
     'last_refresh': datetime.time(),
     'is_server': is_server,
@@ -41,15 +42,27 @@ message = {
     'nearest_server': []
 }
 
+"""
+Nesta Format String, o caractere > indica que os dados estão em big-endian byte order,
+Os códigos de formatação individuais especificam os tipos dos campos em 'mensagem'.
+O código de formatação 64s indica que os campos 'nodo' e 'port' são strings de até 64 caracteres,
+O código de formatação 16s indica que os campos 'tempo' e 'last_refresh' são objetos de data e hora de até 16 caracteres
+O código de formatação L indica que o campo 'saltos' é um inteiro sem sinal de 32 bits,
+O ? código de formatação indica que os campos 'is_server' e 'is_bigNode' são booleanos,
+O código de formatação 64s no final indica que o campo 'nearest_server' é uma lista de strings de até 64 caracteres cada
+"""
+
+PACKET_FORMAT = ">64s64s16sL16s??64s"
+
 
 # ----------------------- enviar mensagens -----------------------
 
-def send_message(nodo, message):
+def send_message(nodo, m):
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.bind(nodo['ip'], nodo['port'])
+    s.bind((nodo['ip'], nodo['port']))
 
     # Serialize the message using JSON
-    message_data = json.dumps(message)
+    message_data = json.dumps(m)
     s.send(message_data)
     s.close()
 
@@ -60,8 +73,8 @@ def flood():
 
 
 def refresh_message():
-    message['tempo'] = time.time()
-    message['last_refresh'] = time.time()
+    message['tempo'] = [datetime.now()]
+    message['last_refresh'] = datetime.now()
 
 
 def refresh():
@@ -74,17 +87,18 @@ def refresh():
 
 # ----------------------- receber mensagens -----------------------
 
-def get_faster_path():
-    return [message['fastest_path'][-1]]
+
+def check_and_register(m):
+    if m['is_server'] or m['is_big_node']:
+        delta = m['tempo'][1]
+
+        if not message['nearest_server'] or message['nearest_server'][0][1] >= (m['nearest_server'][0][1] + delta):
+            message['nearest_server'] = [(m['nodo'], m['tempo'][0] + delta)]
 
 
-def new_faster_path(param):
-    pass
-
-
-def receive_message(nodo, m):
-    delta = time.time() - m['tempo']
-    m['tempo'] = delta
+def receive_message(m):
+    delta = datetime.now() - m['tempo'][0]
+    m['tempo'][1] = delta
 
     if m['nodo'] == node_id:
         return
@@ -92,12 +106,10 @@ def receive_message(nodo, m):
     if m['saltos'] >= max_hops:
         return
 
-    if new_faster_path(m['fastest_path']):
-        message['fastest_path'] = m['fastest_path']
-    else:
-        m['fastest_path'] = get_faster_path()
+    # Verifica e Regista a informação do nodo na lista de servidores mais próximos
+    check_and_register(m)
 
-    # If the message is not in the list of known messages, add it and update the message
+    # Se o nodo da mensagem não está na tabela local, adiciona e atualiza
     if m not in local_info:
         m['saltos'] += 1
         m['last_refresh'] = time.time()
@@ -108,13 +120,12 @@ def receive_message(nodo, m):
 
         local_info.append(m)
 
-    # Flood the updated message to all known peers
     flood()
 
 
 def listen_to(nodo):
     s = socket.socket()
-    s.bind(nodo['ip'], nodo['port'])
+    s.bind((nodo['ip'], nodo['port']))
 
     # Start listening for incoming connections
     s.listen(1)
@@ -122,12 +133,15 @@ def listen_to(nodo):
 
     while True:
         data = conn.recv(1024)
+        m0 = data.decode()
 
-        if not data:
+        packet_data = struct.unpack(PACKET_FORMAT, data)
+
+        if 'nodo' not in packet_data:
             break
 
-        m = json.loads(data)
-        receive_message(nodo, m)
+        m = json.loads(m0)
+        receive_message(m)
 
     conn.close()
 
@@ -150,6 +164,7 @@ def message_handler():
 
 
 # ----------------------- oNode.py -----------------------
+
 lock = threading.Lock()
 
 threads = []

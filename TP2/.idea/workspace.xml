@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7b5cb967-367f-4a3e-b3ad-21cadadbf23d" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/src/final/oNode.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/final/oNode.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/oNode.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/oNode.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -47,6 +47,8 @@
       <recent name="E:\GIT\projetosESR\tp2\src\final" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="E:\GIT\projetosESR\tp2\src" />
+      <recent name="E:\GIT\projetosESR\tp2\src\old" />
       <recent name="E:\GIT\projetosESR\tp2\src\final\Streaming" />
     </key>
   </component>
@@ -97,7 +99,7 @@
       <workItem from="1670255322761" duration="26000" />
       <workItem from="1670499098596" duration="3220000" />
       <workItem from="1670518123898" duration="10788000" />
-      <workItem from="1670583910062" duration="1304000" />
+      <workItem from="1670583910062" duration="4496000" />
     </task>
     <servers />
   </component>
