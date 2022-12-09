@@ -2,7 +2,7 @@ from random import randint
 import threading, socket
 
 from VideoStream import VideoStream
-from src.final.Streaming.RtpPacket import RtpPacket
+from src.Streaming.RtpPacket import RtpPacket
 
 
 class ServerStreamer:

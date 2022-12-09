@@ -1,8 +1,8 @@
 from random import randint
-import sys, traceback, threading, socket
+import threading, socket
 
 from VideoStream import VideoStream
-from RtpPacket import RtpPacket
+from src.old.RtpPacket import RtpPacket
 
 
 class ServerStreamer:

@@ -1,10 +1,10 @@
 import os
 import re
 from tkinter import Tk
-from src.final.Streaming.ClientStreamer import ClientStreamer
+from src.Streaming.ClientStreamer import ClientStreamer
 from time import sleep
 
-from src.final.oNode import lock
+from src.oNode import lock
 
 
 def nearest_big_node(local_info):

@@ -1,74 +1,164 @@
-import re
-from threading import Thread
+import json
+import datetime
+import threading
+import sys
+import socket
 import time
 
+from src.handlers.client import ui_handler
+from src.handlers.server import server_handler
 
-# import server
-# import client
+file_id = str(sys.argv)[0]
 
-def getIndex(li, ip):
-    for index, x in enumerate(li):
-        if x.ip == ip:
-            return index
-    return -1
+c = open(f'topologia{file_id}.json')
+i = open(f'node_info{file_id}.json')
+
+info = json.load(i)
+connections = json.load(c)
+
+# ----------------------- variaveis locais -----------------------
+
+node_id = info['node_id']
+my_port = info['my_port']
+is_bigNode = info['is_bigNode']  # True / False
+is_server = info['is_server']  # True / False
+ports = info['ports']  # ({'ip': '192.168.1.3', 'port': 5000})
+
+local_info = []  # mirrors message structure
+
+# número max de saltos para o flooding
+max_hops = 20
+
+# The message that will be sent to other nodes
+message = {
+    'nodo': node_id,
+    'port': my_port,
+    'tempo': datetime.time(),
+    'saltos': 0,
+    'last_refresh': datetime.time(),
+    'is_server': is_server,
+    'is_bigNode': is_bigNode,
+    'nearest_server': []
+}
 
 
-# ------------------ INTERFACE (NODO) ------------------
-class interface:
+# ----------------------- enviar mensagens -----------------------
 
-    def __init__(self, ip, requiredFiles, currentFiles):
-        self.ip = ip  # ips das interfaces ligadas aos nodos
-        self.requiredFiles = requiredFiles  # lista de ficheiros que ele quer
-        self.currentFiles = currentFiles  # lista de ficheiros que ele tem
+def send_message(nodo, message):
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.bind(nodo['ip'], nodo['port'])
 
-
-"""
-# ---------------------- THREADS ----------------------
-class threads:
-
-    def thread1(self):
-        server()
-
-    def thread2(self):
-        client()
-    
-    def thread3(self):
-        pass
-"""
+    # Serialize the message using JSON
+    message_data = json.dumps(message)
+    s.send(message_data)
+    s.close()
 
 
-# --------------------- APP ONODE ---------------------
-class oNode:
+def flood():
+    for entry in ports:
+        send_message(entry, message)
 
-    def __init__(self):
-        pass
 
-    def overlayNetwork(self, command):
-        nodes = []
-        pairs = re.findall("(?:\[(.*?)\])", command)  # ['A:B,C', 'B:C', 'C:D,E']
-        neighbors = []  # [ (indA,indB,distanceAB), (indA,indB,distanceAC), (ind,C,distanceBC) ]
-        for p in pairs:
-            ips = re.split(r'\s*:\s*', p)  # 'C', 'D,E'
-            interf1 = interface(ips[0], [], [])
-            if not any(obj.ip == ips[0] for obj in nodes):
-                nodes.append(interf1)
-            ips2 = re.split(r'\s*,\s', ips[1])  # 'D', 'E'
-            for next in ips2:
-                interf2 = interface(next, [], [])
-                if not any(obj.ip == next for obj in nodes):
-                    nodes.append(interf2)
-                neighbors.append((getIndex(nodes, interf1.ip), (getIndex(nodes, interf2.ip))))
-        return nodes, neighbors
+def refresh_message():
+    message['tempo'] = time.time()
+    message['last_refresh'] = time.time()
 
-    """
-    def start():
-        server = Thread(target=threads().thread1(), args=())
-        client = Thread(target=threads().thread2(), args=())
-        updateRouteTable = Thread(target=threads().thread3(), args=())
-        # server.start()
-        # client.start()
-        # updateRouteTable.start()
-        # server.join()
-        # client.join()
-        # updateRouteTable.join()
-    """
+
+def refresh():
+    flood()
+    while True:
+        time.sleep(30)
+        refresh_message()
+        flood()
+
+
+# ----------------------- receber mensagens -----------------------
+
+def get_faster_path():
+    return [message['fastest_path'][-1]]
+
+
+def new_faster_path(param):
+    pass
+
+
+def receive_message(nodo, m):
+    delta = time.time() - m['tempo']
+    m['tempo'] = delta
+
+    if m['nodo'] == node_id:
+        return
+
+    if m['saltos'] >= max_hops:
+        return
+
+    if new_faster_path(m['fastest_path']):
+        message['fastest_path'] = m['fastest_path']
+    else:
+        m['fastest_path'] = get_faster_path()
+
+    # If the message is not in the list of known messages, add it and update the message
+    if m not in local_info:
+        m['saltos'] += 1
+        m['last_refresh'] = time.time()
+
+        # set the appropriate flags in the message
+        m['is_server'] = is_server
+        m['is_big_node'] = is_bigNode
+
+        local_info.append(m)
+
+    # Flood the updated message to all known peers
+    flood()
+
+
+def listen_to(nodo):
+    s = socket.socket()
+    s.bind(nodo['ip'], nodo['port'])
+
+    # Start listening for incoming connections
+    s.listen(1)
+    conn, addr = s.accept()
+
+    while True:
+        data = conn.recv(1024)
+
+        if not data:
+            break
+
+        m = json.loads(data)
+        receive_message(nodo, m)
+
+    conn.close()
+
+
+def listening():
+    for node in ports:
+        t = threading.Thread(target=listen_to, args=(node,))
+        t.start()
+
+
+def message_handler():
+    send = threading.Thread(target=refresh, args=())
+    rec = threading.Thread(target=listening(), args=())
+
+    send.start()
+    rec.start()
+
+    send.join()
+    rec.join()
+
+
+# ----------------------- oNode.py -----------------------
+lock = threading.Lock()
+
+threads = []
+
+media_player = threading.Thread(target=ui_handler, args=(local_info, node_id))
+media_player.start()
+
+servidor = threading.Thread(target=server_handler, args=(ports, node_id))
+servidor.start()
+
+servidor.join()
+media_player.join()
