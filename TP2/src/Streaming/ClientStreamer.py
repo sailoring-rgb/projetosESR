@@ -6,7 +6,7 @@ from tkinter import *
 
 from PIL import Image, ImageTk
 
-from RtpPacket import RtpPacket
+from Streaming.RtpPacket import RtpPacket
 
 CACHE_FILE_NAME = "cache-"
 CACHE_FILE_EXT = ".jpg"

@@ -5,14 +5,20 @@ import sys
 import socket
 import time
 import struct
+import os, re
 
-from src.handlers.client import ui_handler
-from src.handlers.server import server_handler
+import handlers.client as client
+from Streaming.ServerStreamer import ServerStreamer
 
-file_id = str(sys.argv)[0]
+file_id = sys.argv[1]
 
-c = open(f'topologia{file_id}.json')
-i = open(f'node_info{file_id}.json')
+current_pwd_path = os.path.dirname(os.path.abspath(__file__))
+video_pwd_path = (re.findall("(?:(.*?)src)", current_pwd_path))[0]
+path_to_topologia = os.path.join(video_pwd_path, "overlay/topologia" + str(file_id) + ".json")
+path_to_node_info = os.path.join(video_pwd_path, "overlay/node_info" + str(file_id) + ".json")
+
+c = open(path_to_topologia)
+i = open(path_to_node_info)
 
 info = json.load(i)
 connections = json.load(c)
@@ -20,7 +26,7 @@ connections = json.load(c)
 # ----------------------- variaveis locais -----------------------
 
 node_id = info['node_id']
-my_port = info['my_port']
+my_port = int(info['my_port'])
 is_bigNode = info['is_bigNode']  # True / False
 is_server = info['is_server']  # True / False
 ports = info['ports']  # ({'ip': '192.168.1.3', 'port': 5000})
@@ -59,7 +65,8 @@ PACKET_FORMAT = ">64s64s16sL16s??64s"
 
 def send_message(nodo, m):
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.bind((nodo['ip'], nodo['port']))
+    print(f"\n\nPORTA: {int(nodo['port'])}\n\n")
+    s.bind((nodo['ip'], int(nodo['port'])))
 
     # Serialize the message using JSON
     message_data = json.dumps(m)
@@ -108,24 +115,23 @@ def receive_message(m):
         return
 
     # Se o nodo da mensagem já está na tabela local, atualiza
-    if any(msg['nodo'] == m['nodo'] for msg in local_info):
-        existing_message = next(msg for msg in local_info if msg['nodo'] == m['nodo'])
+    if any(msg['nodo'] == m['nodo'] for msg in self.local_info):
+        existing_message = next(msg for msg in self.local_info if msg['nodo'] == m['nodo'])
         existing_message.update(m)
         existing_message['last_refresh'] = datetime.time()
     else:
         m['saltos'] += 1
         m['last_refresh'] = datetime.time()
-        local_info.append(m)
+        self.local_info.append(m)
 
     # Verifica e Regista a informação do nodo na lista de servidores mais próximos
     check_and_register(m)
 
     flood()
 
-
 def listen_to(nodo):
     s = socket.socket()
-    s.bind((nodo['ip'], nodo['port']))
+    s.bind((nodo['ip'], int(nodo['port'])))
 
     # Start listening for incoming connections
     s.listen(1)
@@ -153,14 +159,14 @@ def listening():
 
 
 def message_handler():
+    rec = threading.Thread(target=listening, args=())
     send = threading.Thread(target=refresh, args=())
-    rec = threading.Thread(target=listening(), args=())
 
-    send.start()
     rec.start()
+    send.start()
 
-    send.join()
     rec.join()
+    send.join()
 
 
 # ----------------------- oNode.py -----------------------
@@ -169,11 +175,33 @@ lock = threading.Lock()
 
 threads = []
 
-media_player = threading.Thread(target=ui_handler, args=(local_info, node_id))
-media_player.start()
+# ------ CLIENTE -------
 
-servidor = threading.Thread(target=server_handler, args=(ports, node_id))
-servidor.start()
+if is_server == "False":
+    media_player = threading.Thread(target=client.ui_handler, args=(local_info, node_id, lock))
+    media_player.start()
+    media_player.join()
 
-servidor.join()
-media_player.join()
+# ------ SERVIDOR ------
+
+elif is_server == "True":
+    # refresh_table = threading.Thread(target=message_handler, args=())
+    # refresh_table.start()
+    # refresh_table.join()
+    
+    print('A iniciar servidor...\n')
+    rtspSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    rtspSocket.bind((node_id, my_port))
+    print(f"À escuta em {node_id}: {my_port}\n")
+    rtspSocket.listen(5)
+
+	# Receive client info (address,port) through RTSP/TCP session
+    while True:
+        try:
+            clientInfo = {}
+            clientInfo['rtspSocket'] = rtspSocket.accept()  # clientInfo['rtspSocket'] = (clientConnection, clientAddress)
+            ServerStreamer(clientInfo).run()
+        except Exception:
+            break
+
+    rtspSocket.close()

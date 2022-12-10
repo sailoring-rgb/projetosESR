@@ -1,14 +1,14 @@
 import threading
 import socket
-from src.Streaming.ServerStreamer import ServerStreamer
-from src.oNode import message_handler, lock
+from Streaming.ServerStreamer import ServerStreamer
 
 
-def port_handler(port, node_id):
+def server_handler(port, node_id, lock):
+    print('A iniciar servidor...')
     lock.acquire()
     rtsp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     rtsp_socket.bind((node_id, port))
-    print(f"Listening on {node_id}: {port}")
+    print(f"À escuta em {node_id}: {port}")
     lock.release()
 
     rtsp_socket.listen(5)
@@ -16,7 +16,8 @@ def port_handler(port, node_id):
     # Receive client info (address,port) through RTSP/TCP session
     while True:
         try:
-            client_info = {'rtspSocket': rtsp_socket.accept()}
+            clientInfo = {}
+            clientInfo['rtspSocket'] = rtspSocket.accept()  # clientInfo['rtspSocket'] = (clientConnection, clientAddress)
             ServerStreamer(client_info).run()
         except Exception:
             break
@@ -24,15 +25,15 @@ def port_handler(port, node_id):
     # if is_bigNode : armazena tabela de ficheiros locais da sua subrede
     rtsp_socket.close()
 
-
-def network_handler(ports):
+"""
+def network_handler(ports, node_id, lock):
     ports_threads = []
 
     for port in ports:
         lock.acquire()
-        porta = port['port']
+        porta = int(port['port'])
         lock.release()
-        thread = threading.Thread(target=port_handler, args=(porta,))
+        thread = threading.Thread(target=port_handler, args=(porta,node_id,lock))
         thread.start()
         ports_threads.append(thread)
     for thread in ports_threads:
@@ -40,13 +41,11 @@ def network_handler(ports):
     pass
 
 
-def server_handler(ports, node_id):
-    print('a iniciar servidor servidor...')
-    refresh_table = threading.Thread(target=message_handler, args=())
-    refresh_table.start()
+def server_handler(port, node_id, lock):
+    print('A iniciar servidor...')
 
-    network = threading.Thread(target=network_handler, args=(ports, node_id))
-    network.start()
+    server = threading.Thread(target=port_handler, args=(port,node_id,lock))
+    server.start()
 
-    refresh_table.join()
-    network.join()
+    server.join()
+"""

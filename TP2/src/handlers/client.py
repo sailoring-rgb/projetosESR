@@ -1,10 +1,8 @@
 import os
 import re
 from tkinter import Tk
-from src.Streaming.ClientStreamer import ClientStreamer
+from Streaming.ClientStreamer import ClientStreamer
 from time import sleep
-
-from src.oNode import lock
 
 
 def nearest_big_node(local_info):
@@ -12,8 +10,9 @@ def nearest_big_node(local_info):
     return 0, 1
 
 
-def ui_handler(local_info, node_id):
-    print('a iniciar client...')
+def ui_handler(local_info, node_id, lock):
+    print('A iniciar cliente...')
+    print(local_info)
     while True:
         if os.environ.get('DISPLAY', '') == '':
             print('No display found... Using DISPLAY :0.0\n')
