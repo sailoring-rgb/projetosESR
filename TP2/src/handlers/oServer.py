@@ -4,7 +4,7 @@ from time import sleep
 from Streaming.ServerStreamer import ServerStreamer
 
 
-def handler_404(client_info):
+def handler_404(client_info, is_bigNode):
     if is_bigNode:
         # Verifica se tem ficheiros? se sim -> envia ficheiros, se não -> envia pedidos
         pass
@@ -43,7 +43,7 @@ def stream(node_id, my_port, is_server, is_bigNode, MAX_CONN):
             ServerStreamer(client_info).run()
         except Exception as ex:
             if ex == "404":
-                handler_404(client_info)
+                handler_404(client_info, is_bigNode)
             elif ex == "500":
                 handler_500(client_info)
             else:

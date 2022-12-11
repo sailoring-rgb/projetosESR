@@ -7,10 +7,8 @@ import struct
 import sys
 import threading
 import time
-from bson import json_util
 import handlers.oClient as client
 import handlers.oServer as server
-from Streaming.ServerStreamer import ServerStreamer
 
 file_id = sys.argv[1]
 
@@ -68,13 +66,19 @@ PACKET_FORMAT = ">64s64s16sL16s??64s"
 
 # ----------------------- Enviar mensagens -----------------------
 
+def default(obj):
+    if isinstance(obj, datetime):
+        return obj.isoformat()
+    return json.JSONEncoder().default(obj)
+
+
 def send_message(nodo, m):
     print(f"\n\n[{nodo['ip']}: {nodo['port']}] is sending a message \n{m}\n\n")
 
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.bind((node_id, my_port))
 
-    message_data = json.dumps(m, default=json_util.default)
+    message_data = json.dumps(m, default=default)
     s.sendto(message_data.encode(), (nodo['ip'], int(nodo['port'])))
     s.close()
 
