@@ -33,7 +33,7 @@ is_bigNode = info['is_bigNode']  # True / False
 is_server = info['is_server']  # True / False
 ports = info['ports']  # ({'ip': '192.168.1.3', 'port': 5000})
 
-local_info = []# mirrors message structure
+local_info = []  # mirrors message structure
 
 # Número max de saltos para o flooding
 max_hops = 20
@@ -44,13 +44,13 @@ MAX_CONN = 25
 # Estrutura da Mensagem a enviar aos nodos aquando do Flooding
 message = {
     'nodo': str(node_id),
-    'port': str(my_port),
-    'tempo': str([datetime.time()]),
-    'saltos': "0",
-    'last_refresh': str(datetime.time()),
-    'is_server': str(is_server),
-    'is_bigNode': str(is_bigNode),
-    'nearest_server': str([])
+    'port': my_port,
+    'tempo': [datetime.time()],
+    'saltos': 0,
+    'last_refresh': datetime.time(),
+    'is_server': is_server,
+    'is_bigNode': is_bigNode,
+    'nearest_server': []
 }
 
 """
@@ -85,12 +85,12 @@ def flood():
 
 
 def refresh_message():
-    message['tempo'] = [datetime.datetime.now()]
-    message['last_refresh'] = datetime.datetime.now()
+    print(f"\n[{node_id}:{my_port}] is refreshing the flooding process.\n")
+    message['tempo'] = datetime.now()
+    message['last_refresh'] = datetime.now()
 
 
 def refresh():
-    print("its happening")
     flood()
     while True:
         time.sleep(30)
@@ -101,17 +101,21 @@ def refresh():
 # ----------------------- Receber mensagens -----------------------
 
 def check_and_register(m):
+    if is_server:
+        message['nearest_server'].insert(0, (node_id, my_port, 0))
+        return
     if m['is_server'] == "True" or m['is_big_node'] == "True":
         delta = m['tempo'][1]
 
         if message['nearest_server'] != [] or (message['nearest_server'][0][2] >= (m['nearest_server'][0][2] + delta)
-                                             or (message['nearest_server'][0][2] == m['nearest_server'][0][2]
-                                                 + delta and m['saltos'] < message['saltos'])):
-            message['nearest_server'] = [(m['nodo'], m['port'], m['tempo'][0] + delta)]
+                                               or (message['nearest_server'][0][2] == m['nearest_server'][0][2]
+                                                   + delta and m['saltos'] < message['saltos'])):
+            message['nearest_server'].insert(0, (m['nodo'], m['port'], m['tempo'][0] + delta))
+        else:
+            message['nearest_server'].append((m['nodo'], m['port'], m['tempo'][0] + delta))
 
 
-def receive_message(m_encoded):
-    m = m_encoded.decode()
+def receive_message(m):
     print(f"[{node_id}: {my_port}] recebeu: \n{m}.\n")
 
     delta = datetime.datetime.now() - m['tempo'][0]
@@ -142,11 +146,13 @@ def receive_message(m_encoded):
 def listening():
     s = socket.socket()
     s.bind((node_id, my_port))
+    print(f"[{node_id} à escuta em {my_port}]\n")
 
     while True:
         data, address = s.recvfrom(1024)
         m0 = data.decode()
 
+        print(f"[m0]:\n[{m0}]\n")
         packet_data = struct.unpack(PACKET_FORMAT, data)
 
         if 'nodo' not in packet_data:
@@ -181,7 +187,7 @@ refresh_table.start()
 
 if is_server == "True" or is_bigNode == "True":
     # Escuta por pedidos e envia ficheiros
-    streaming = threading.Thread(target=server.stream, args=(node_id,my_port,is_server,is_bigNode,MAX_CONN))
+    streaming = threading.Thread(target=server.stream, args=(node_id, my_port, is_server, is_bigNode, MAX_CONN))
     streaming.start()
 
 else:
