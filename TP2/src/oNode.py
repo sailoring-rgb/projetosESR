@@ -7,7 +7,8 @@ import struct
 import sys
 import threading
 import time
-import handlers.client as client
+import handlers.oClient as client
+import handlers.oServer as server
 from Streaming.ServerStreamer import ServerStreamer
 
 file_id = sys.argv[1]
@@ -23,7 +24,7 @@ i = open(path_to_node_info)
 info = json.load(i)
 connections = json.load(c)
 
-# ----------------------- variaveis locais -----------------------
+# ----------------------- Variaveis locais -----------------------
 
 node_id = info['node_id']
 my_port = int(info['my_port'])
@@ -33,10 +34,10 @@ ports = info['ports']  # ({'ip': '192.168.1.3', 'port': 5000})
 
 local_info = []# mirrors message structure
 
-# número max de saltos para o flooding
+# Número max de saltos para o flooding
 max_hops = 20
 
-# número max de conexões
+# Número max de conexões
 MAX_CONN = 25
 
 # Estrutura da Mensagem a enviar aos nodos aquando do Flooding
@@ -64,7 +65,7 @@ O código de formatação '64s' no final indica que o campo 'nearest_server' é 
 PACKET_FORMAT = ">64s64s16sL16s??64s"
 
 
-# ----------------------- enviar mensagens -----------------------
+# ----------------------- Enviar mensagens -----------------------
 
 def send_message(nodo, m):
     print(f"\n\n[{nodo['ip']}:{nodo['port']}] is sending a message \n{m}\n\n")
@@ -95,7 +96,7 @@ def refresh():
         flood()
 
 
-# ----------------------- receber mensagens -----------------------
+# ----------------------- Receber mensagens -----------------------
 
 def check_and_register(m):
     if m['is_server'] or m['is_big_node']:
@@ -166,56 +167,6 @@ def message_handler():
     send.join()
 
 
-# ----------------------- envia ficheiros -----------------------
-
-def handler_404(client_info):
-    if is_bigNode:
-        # verifica se tem ficheiros? se sim -> envia ficheiros, se não -> envia pedidos
-        pass
-    else:
-        print(f"404 NOT FOUND.\n{client_info}\n")
-        reply = 'RTSP/1.0 404 NOT FOUND\nCSeq: ' + '\nSession: ' + str(client_info['session'])
-        conn_socket = (client_info['rtspSocket'])[0]
-        conn_socket.send(reply.encode())
-    pass
-
-
-def handler_500(client_info):
-    print(f"500 CONNECTION ERROR.\n{client_info}\n")
-    reply = 'RTSP/1.0 500 CONNECTION ERROR\nCSeq: ' + '\nSession: ' + str(client_info['session'])
-    conn_socket = (client_info['rtspSocket'])[0]
-    conn_socket.send(reply.encode())
-
-
-def stream():
-    rtsp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    rtsp_socket.bind((node_id, my_port))
-
-    if is_server == "True":
-        print(f"\nServidor à escuta em {node_id}: {my_port}\n")
-    if is_bigNode == "True":
-        print(f"\nBig Node à escuta em {node_id}: {my_port}\n")
-
-    rtsp_socket.listen(MAX_CONN)
-
-    # Receive client info (address,port) through RTSP/TCP session
-    while True:
-        client_info = {}
-        try:
-            client_info = {'rtspSocket': rtsp_socket.accept()}
-            ServerStreamer(client_info).run()
-        except Exception as ex:
-            if ex == "404":
-                handler_404(client_info)
-            elif ex == "500":
-                handler_500(client_info)
-            else:
-                print(f"Exception: [{ex}]\n")
-            break
-
-    rtsp_socket.close()
-
-
 # ----------------------- oNode.py -----------------------
 
 lock = threading.Lock()
@@ -226,12 +177,12 @@ threads = []
 # refresh_table.start()
 
 if is_server == "True" or is_bigNode == "True":
-    # escuta por pedidos e envia ficheiros
-    streaming = threading.Thread(target=stream, args=())
+    # Escuta por pedidos e envia ficheiros
+    streaming = threading.Thread(target=server.stream, args=(node_id,my_port,is_server,is_bigNode,MAX_CONN))
     streaming.start()
 
 else:
-    # faz pedidos
+    # Faz pedidos
     media_player = threading.Thread(target=client.ui_handler, args=(local_info, node_id, my_port, lock))
     media_player.start()
 

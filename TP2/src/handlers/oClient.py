@@ -8,17 +8,17 @@ from Streaming.ClientStreamer import ClientStreamer
 def ui_handler(local_info, node_id, my_port, lock):
     print('\nA iniciar cliente...')
 
-    """
     local_info = {
         "nearest_server": [
             {"ip": "10.0.1.22",
             "port": "3010"}
         ]
     }
-    """
-    on = True
 
+    on = True
+    
     while on:
+        
         if os.environ.get('DISPLAY', '') == '':
             print('Nenhum display encontrado... Usar DISPLAY :0.0')
             os.environ.__setitem__('DISPLAY', ':0.0')
