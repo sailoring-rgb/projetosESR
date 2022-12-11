@@ -132,7 +132,7 @@ def receive_message(m):
     flood()
 
 
-def listen_to(nodo):
+def listening():
     s = socket.socket()
     s.bind((node_id, my_port))
 
@@ -152,12 +152,6 @@ def listen_to(nodo):
         receive_message(m)
 
     s.close()
-
-
-def listening():
-    for node in ports:
-        t = threading.Thread(target=listen_to, args=(node,))
-        t.start()
 
 
 def message_handler():
