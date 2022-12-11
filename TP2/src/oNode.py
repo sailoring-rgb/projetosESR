@@ -1,12 +1,13 @@
-import json
 import datetime
-import threading
-import sys
+import json
+import os
+import re
 import socket
-import time
 import struct
-import os, re
-
+import sys
+import threading
+import time
+import traceback
 import handlers.client as client
 from Streaming.ServerStreamer import ServerStreamer
 
@@ -65,10 +66,9 @@ PACKET_FORMAT = ">64s64s16sL16s??64s"
 
 def send_message(nodo, m):
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    print(f"\n\nPORTA: {int(nodo['port'])}\n\n")
+    print(f"\n\n[{nodo['ip']}:{nodo['port']}] is sending a message \n{m}\n\n")
     s.bind((nodo['ip'], int(nodo['port'])))
 
-    # Serialize the message using JSON
     message_data = json.dumps(m)
     s.send(message_data)
     s.close()
@@ -115,19 +115,20 @@ def receive_message(m):
         return
 
     # Se o nodo da mensagem já está na tabela local, atualiza
-    if any(msg['nodo'] == m['nodo'] for msg in self.local_info):
-        existing_message = next(msg for msg in self.local_info if msg['nodo'] == m['nodo'])
+    if any(msg['nodo'] == m['nodo'] for msg in local_info):
+        existing_message = next(msg for msg in local_info if msg['nodo'] == m['nodo'])
         existing_message.update(m)
         existing_message['last_refresh'] = datetime.time()
     else:
         m['saltos'] += 1
         m['last_refresh'] = datetime.time()
-        self.local_info.append(m)
+        local_info.append(m)
 
     # Verifica e Regista a informação do nodo na lista de servidores mais próximos
     check_and_register(m)
 
     flood()
+
 
 def listen_to(nodo):
     s = socket.socket()
@@ -188,20 +189,20 @@ elif is_server == "True":
     # refresh_table = threading.Thread(target=message_handler, args=())
     # refresh_table.start()
     # refresh_table.join()
-    
+
     print('A iniciar servidor...\n')
     rtspSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     rtspSocket.bind((node_id, my_port))
     print(f"À escuta em {node_id}: {my_port}\n")
     rtspSocket.listen(5)
 
-	# Receive client info (address,port) through RTSP/TCP session
+    # Receive client info (address,port) through RTSP/TCP session
     while True:
         try:
-            clientInfo = {}
-            clientInfo['rtspSocket'] = rtspSocket.accept()  # clientInfo['rtspSocket'] = (clientConnection, clientAddress)
+            clientInfo = {'rtspSocket': rtspSocket.accept()}
             ServerStreamer(clientInfo).run()
-        except Exception:
+        except Exception as e:
+            print(f'{e}\n{traceback.print_exc()}\n')
             break
 
     rtspSocket.close()
