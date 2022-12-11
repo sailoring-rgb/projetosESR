@@ -28,9 +28,9 @@ def stream(node_id, my_port, is_server, is_big_node, max_conn):
     rtsp_socket.bind((node_id, my_port))
 
     if is_server == "True":
-        print(f"\nServidor à escuta em {node_id}: {my_port}\n")
+        print(f"\nServidor à escuta em {node_id}: {my_port} (streaming)\n")
     if is_big_node == "True":
-        print(f"\nBig Node à escuta em {node_id}: {my_port}\n")
+        print(f"\nBig Node à escuta em {node_id}: {my_port} (streaming)\n")
 
     rtsp_socket.listen(max_conn)
 

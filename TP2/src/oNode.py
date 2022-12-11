@@ -42,7 +42,7 @@ MAX_CONN = 25
 
 # Estrutura da Mensagem a enviar aos nodos aquando do Flooding
 message = {
-    'nodo': str(node_id),
+    'nodo': node_id,
     'flood_port': port_flooding,
     'stream_port': port_streaming,
     'tempo': [datetime.time()],
@@ -150,7 +150,7 @@ def listening(s):
     print(f"[{node_id} à escuta em {port_flooding}]\n")
 
     while True:
-        data, address = s.recvfrom(1024)
+        data = s.recvfrom(1024)
         m0 = data.decode()
 
         print(f"[m0]:\n[{m0}]\n")
