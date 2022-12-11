@@ -80,7 +80,7 @@ def send_message(nodo, m, s):
     print(f"\n\n[{nodo['ip']}: {nodo['port']}] is sending a message \n{m}\n\n")
 
     message_data = json.dumps(m, default=default)
-    s.sendto(message_data.encode(), (nodo['ip'], int(nodo['flood_port'])))
+    s.sendto(message_data.encode(), (nodo['ip'], int(nodo['port'])))
     s.close()
 
 
