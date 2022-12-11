@@ -72,20 +72,17 @@ def default(obj):
     return json.JSONEncoder().default(obj)
 
 
-def send_message(nodo, m):
+def send_message(nodo, m, s):
     print(f"\n\n[{nodo['ip']}: {nodo['port']}] is sending a message \n{m}\n\n")
-
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.bind((node_id, my_port))
 
     message_data = json.dumps(m, default=default)
     s.sendto(message_data.encode(), (nodo['ip'], int(nodo['port'])))
     s.close()
 
 
-def flood():
+def flood(s):
     for entry in ports:
-        send_message(entry, message)
+        send_message(entry, message, s)
 
 
 def refresh_message():
@@ -94,12 +91,12 @@ def refresh_message():
     message['last_refresh'] = datetime.now()
 
 
-def refresh():
-    flood()
+def refresh(s):
+    flood(s)
     while True:
         time.sleep(30)
         refresh_message()
-        flood()
+        flood(s)
 
 
 # ----------------------- Receber mensagens -----------------------
@@ -119,7 +116,7 @@ def check_and_register(m):
             message['nearest_server'].append((m['nodo'], m['port'], m['tempo'][0] + delta))
 
 
-def receive_message(m):
+def receive_message(m, s):
     print(f"[{node_id}: {my_port}] recebeu: \n{m}.\n")
 
     delta = datetime.datetime.now() - m['tempo'][0]
@@ -144,12 +141,10 @@ def receive_message(m):
     # Verifica e Regista a informação do nodo na lista de servidores mais próximos
     check_and_register(m)
 
-    flood()
+    flood(s)
 
 
-def listening():
-    s = socket.socket()
-    s.bind((node_id, my_port))
+def listening(s):
     print(f"[{node_id} à escuta em {my_port}]\n")
 
     while True:
@@ -163,15 +158,18 @@ def listening():
             break
 
         m = json.loads(m0)
-        receive_message(m)
+        receive_message(m, s)
 
     s.close()
 
 
 def message_handler():
     time.sleep(30)
-    send = threading.Thread(target=refresh, args=())
-    rec = threading.Thread(target=listening, args=())
+    s = socket.socket()
+    s.bind((node_id, my_port))
+
+    send = threading.Thread(target=refresh, args=(s,))
+    rec = threading.Thread(target=listening, args=(s,))
 
     rec.start()
     send.start()
