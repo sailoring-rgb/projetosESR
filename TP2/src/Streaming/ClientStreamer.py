@@ -12,7 +12,7 @@ from Streaming.RtpPacket import RtpPacket
 current_pwd_path = os.path.dirname(os.path.abspath(__file__))
 video_pwd_path = (re.findall("(?:(.*?)Streaming)", current_pwd_path))[0]
 CACHE_FILE_NAME = video_pwd_path + "cache-"
-CACHE_FILE_EXT = video_pwd_path + ".jpg"
+CACHE_FILE_EXT = ".jpg"
 
 
 class ClientStreamer:

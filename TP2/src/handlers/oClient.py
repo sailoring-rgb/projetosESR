@@ -8,13 +8,6 @@ from Streaming.ClientStreamer import ClientStreamer
 def ui_handler(local_info, node_id, my_port, lock):
     print('\nA iniciar cliente...')
 
-    local_info = {
-        "nearest_server": [
-            {"ip": "10.0.1.22",
-            "port": "3010"}
-        ]
-    }
-
     on = True
     
     while on:
@@ -27,6 +20,7 @@ def ui_handler(local_info, node_id, my_port, lock):
         video_pwd_path = (re.findall("(?:(.*?)src)", current_pwd_path))[0]
         filename = input(f'\n\nIntroduza o nome do video: \n')
 
+        print("local_info: " + str(local_info))
         if re.search(r"\:q",filename):
             on = False
         else:

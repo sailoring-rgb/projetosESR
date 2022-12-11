@@ -7,6 +7,7 @@ import struct
 import sys
 import threading
 import time
+from bson import json_util
 import handlers.oClient as client
 import handlers.oServer as server
 from Streaming.ServerStreamer import ServerStreamer
@@ -42,14 +43,14 @@ MAX_CONN = 25
 
 # Estrutura da Mensagem a enviar aos nodos aquando do Flooding
 message = {
-    'nodo': node_id,
-    'port': my_port,
-    'tempo': [datetime.time()],
-    'saltos': 0,
-    'last_refresh': datetime.time(),
-    'is_server': is_server,
-    'is_bigNode': is_bigNode,
-    'nearest_server': []
+    'nodo': str(node_id),
+    'port': str(my_port),
+    'tempo': str([datetime.time()]),
+    'saltos': "0",
+    'last_refresh': str(datetime.time()),
+    'is_server': str(is_server),
+    'is_bigNode': str(is_bigNode),
+    'nearest_server': str([])
 }
 
 """
@@ -68,13 +69,13 @@ PACKET_FORMAT = ">64s64s16sL16s??64s"
 # ----------------------- Enviar mensagens -----------------------
 
 def send_message(nodo, m):
-    print(f"\n\n[{nodo['ip']}:{nodo['port']}] is sending a message \n{m}\n\n")
+    print(f"\n\n[{nodo['ip']}: {nodo['port']}] is sending a message \n{m}\n\n")
 
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.bind((node_id, my_port))
 
-    message_data = json.dumps(m)
-    s.sendto(message_data, (nodo['ip'], int(nodo['port'])))
+    message_data = json.dumps(m, default=json_util.default)
+    s.sendto(message_data.encode(), (nodo['ip'], int(nodo['port'])))
     s.close()
 
 
@@ -84,11 +85,12 @@ def flood():
 
 
 def refresh_message():
-    message['tempo'] = [datetime.now()]
-    message['last_refresh'] = datetime.now()
+    message['tempo'] = [datetime.datetime.now()]
+    message['last_refresh'] = datetime.datetime.now()
 
 
 def refresh():
+    print("its happening")
     flood()
     while True:
         time.sleep(30)
@@ -99,19 +101,20 @@ def refresh():
 # ----------------------- Receber mensagens -----------------------
 
 def check_and_register(m):
-    if m['is_server'] or m['is_big_node']:
+    if m['is_server'] == "True" or m['is_big_node'] == "True":
         delta = m['tempo'][1]
 
-        if not message['nearest_server'] or (message['nearest_server'][0][1] >= (m['nearest_server'][0][1] + delta)
-                                             or (message['nearest_server'][0][1] == m['nearest_server'][0][1]
+        if message['nearest_server'] != [] or (message['nearest_server'][0][2] >= (m['nearest_server'][0][2] + delta)
+                                             or (message['nearest_server'][0][2] == m['nearest_server'][0][2]
                                                  + delta and m['saltos'] < message['saltos'])):
             message['nearest_server'] = [(m['nodo'], m['port'], m['tempo'][0] + delta)]
 
 
-def receive_message(m):
-    print(f"[{node_id}:{my_port}] recebeu: \n[m].\n")
+def receive_message(m_encoded):
+    m = m_encoded.decode()
+    print(f"[{node_id}: {my_port}] recebeu: \n{m}.\n")
 
-    delta = datetime.now() - m['tempo'][0]
+    delta = datetime.datetime.now() - m['tempo'][0]
     m['tempo'][1] = delta
 
     if m['nodo'] == node_id:
@@ -156,9 +159,9 @@ def listening():
 
 
 def message_handler():
-    time.sleep(180)
-    rec = threading.Thread(target=listening, args=())
+    time.sleep(30)
     send = threading.Thread(target=refresh, args=())
+    rec = threading.Thread(target=listening, args=())
 
     rec.start()
     send.start()
@@ -173,8 +176,8 @@ lock = threading.Lock()
 
 threads = []
 
-# refresh_table = threading.Thread(target=message_handler, args=())
-# refresh_table.start()
+refresh_table = threading.Thread(target=message_handler, args=())
+refresh_table.start()
 
 if is_server == "True" or is_bigNode == "True":
     # Escuta por pedidos e envia ficheiros
@@ -186,7 +189,7 @@ else:
     media_player = threading.Thread(target=client.ui_handler, args=(local_info, node_id, my_port, lock))
     media_player.start()
 
-# refresh_table.join()
+refresh_table.join()
 
 if is_server == "True" or is_bigNode == "True":
     streaming.join()
