@@ -26,7 +26,8 @@ connections = json.load(c)
 # ----------------------- Variaveis locais -----------------------
 
 node_id = info['node_id']
-my_port = int(info['my_port'])
+port_flooding = int(info['port_flooding'])
+port_streaming = int(info['port_streaming'])
 is_bigNode = info['is_bigNode']  # True / False
 is_server = info['is_server']  # True / False
 ports = info['ports']  # ({'ip': '192.168.1.3', 'port': 5000})
@@ -42,7 +43,8 @@ MAX_CONN = 25
 # Estrutura da Mensagem a enviar aos nodos aquando do Flooding
 message = {
     'nodo': str(node_id),
-    'port': my_port,
+    'flood_port': port_flooding,
+    'stream_port': port_streaming,
     'tempo': [datetime.time()],
     'saltos': 0,
     'last_refresh': datetime.time(),
@@ -61,7 +63,7 @@ O código de formatação '?' indica que os campos 'is_server' e 'is_bigNode' s�
 O código de formatação '64s' no final indica que o campo 'nearest_server' é uma lista de strings de até 64 chars cada
 """
 
-PACKET_FORMAT = ">64s64s16sL16s??64s"
+PACKET_FORMAT = ">64s64s64s16sL16s??64s"
 
 
 # ----------------------- Enviar mensagens -----------------------
@@ -76,7 +78,7 @@ def send_message(nodo, m, s):
     print(f"\n\n[{nodo['ip']}: {nodo['port']}] is sending a message \n{m}\n\n")
 
     message_data = json.dumps(m, default=default)
-    s.sendto(message_data.encode(), (nodo['ip'], int(nodo['port'])))
+    s.sendto(message_data.encode(), (nodo['ip'], int(nodo['flood_port'])))
     s.close()
 
 
@@ -86,7 +88,7 @@ def flood(s):
 
 
 def refresh_message():
-    print(f"\n[{node_id}:{my_port}] is refreshing the flooding process.\n")
+    print(f"\n[{node_id}:{port_flooding}] is refreshing the flooding process.\n")
     message['tempo'] = datetime.now()
     message['last_refresh'] = datetime.now()
 
@@ -103,7 +105,7 @@ def refresh(s):
 
 def check_and_register(m):
     if is_server:
-        message['nearest_server'].insert(0, (node_id, my_port, 0))
+        message['nearest_server'].insert(0, (node_id, port_flooding, 0))
         return
     if m['is_server'] == "True" or m['is_big_node'] == "True":
         delta = m['tempo'][1]
@@ -111,13 +113,13 @@ def check_and_register(m):
         if message['nearest_server'] != [] or (message['nearest_server'][0][2] >= (m['nearest_server'][0][2] + delta)
                                                or (message['nearest_server'][0][2] == m['nearest_server'][0][2]
                                                    + delta and m['saltos'] < message['saltos'])):
-            message['nearest_server'].insert(0, (m['nodo'], m['port'], m['tempo'][0] + delta))
+            message['nearest_server'].insert(0, (m['nodo'], m['stream_port'], m['tempo'][0] + delta))
         else:
-            message['nearest_server'].append((m['nodo'], m['port'], m['tempo'][0] + delta))
+            message['nearest_server'].append((m['nodo'], m['stream_port'], m['tempo'][0] + delta))
 
 
 def receive_message(m, s):
-    print(f"[{node_id}: {my_port}] recebeu: \n{m}.\n")
+    print(f"[{node_id}: {port_flooding}] recebeu: \n{m}.\n")
 
     delta = datetime.datetime.now() - m['tempo'][0]
     m['tempo'][1] = delta
@@ -145,7 +147,7 @@ def receive_message(m, s):
 
 
 def listening(s):
-    print(f"[{node_id} à escuta em {my_port}]\n")
+    print(f"[{node_id} à escuta em {port_flooding}]\n")
 
     while True:
         data, address = s.recvfrom(1024)
@@ -166,7 +168,7 @@ def listening(s):
 def message_handler():
     time.sleep(30)
     s = socket.socket()
-    s.bind((node_id, my_port))
+    s.bind((node_id, port_flooding))
 
     send = threading.Thread(target=refresh, args=(s,))
     rec = threading.Thread(target=listening, args=(s,))
@@ -189,12 +191,12 @@ refresh_table.start()
 
 if is_server == "True" or is_bigNode == "True":
     # Escuta por pedidos e envia ficheiros
-    streaming = threading.Thread(target=server.stream, args=(node_id, my_port, is_server, is_bigNode, MAX_CONN))
+    streaming = threading.Thread(target=server.stream, args=(node_id, port_streaming, is_server, is_bigNode, MAX_CONN))
     streaming.start()
 
 else:
     # Faz pedidos
-    media_player = threading.Thread(target=client.ui_handler, args=(local_info, node_id, my_port, lock))
+    media_player = threading.Thread(target=client.ui_handler, args=(local_info, node_id, port_streaming, lock))
     media_player.start()
 
 refresh_table.join()

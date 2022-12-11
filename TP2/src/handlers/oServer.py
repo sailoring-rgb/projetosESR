@@ -4,8 +4,8 @@ from time import sleep
 from Streaming.ServerStreamer import ServerStreamer
 
 
-def handler_404(client_info, is_bigNode):
-    if is_bigNode:
+def handler_404(client_info, is_big_node):
+    if is_big_node:
         # Verifica se tem ficheiros? se sim -> envia ficheiros, se não -> envia pedidos
         pass
     else:
@@ -23,16 +23,16 @@ def handler_500(client_info):
     conn_socket.send(reply.encode())
 
 
-def stream(node_id, my_port, is_server, is_bigNode, MAX_CONN):
+def stream(node_id, my_port, is_server, is_big_node, max_conn):
     rtsp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     rtsp_socket.bind((node_id, my_port))
 
     if is_server == "True":
         print(f"\nServidor à escuta em {node_id}: {my_port}\n")
-    if is_bigNode == "True":
+    if is_big_node == "True":
         print(f"\nBig Node à escuta em {node_id}: {my_port}\n")
 
-    rtsp_socket.listen(MAX_CONN)
+    rtsp_socket.listen(max_conn)
 
     # Receber informação sobre cliente (ip,porta) através da sessão RTSP/TCP
     while True:
@@ -43,7 +43,7 @@ def stream(node_id, my_port, is_server, is_bigNode, MAX_CONN):
             ServerStreamer(client_info).run()
         except Exception as ex:
             if ex == "404":
-                handler_404(client_info, is_bigNode)
+                handler_404(client_info, is_big_node)
             elif ex == "500":
                 handler_500(client_info)
             else:
