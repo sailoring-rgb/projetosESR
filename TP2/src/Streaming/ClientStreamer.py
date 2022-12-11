@@ -8,8 +8,11 @@ from PIL import Image, ImageTk
 
 from Streaming.RtpPacket import RtpPacket
 
-CACHE_FILE_NAME = "cache-"
-CACHE_FILE_EXT = ".jpg"
+
+current_pwd_path = os.path.dirname(os.path.abspath(__file__))
+video_pwd_path = (re.findall("(?:(.*?)Streaming)", current_pwd_path))[0]
+CACHE_FILE_NAME = video_pwd_path + "cache-"
+CACHE_FILE_EXT = video_pwd_path + ".jpg"
 
 
 class ClientStreamer:
@@ -41,7 +44,7 @@ class ClientStreamer:
         self.teardownAcked = 0
         self.connectToServer()
         self.frameNbr = 0
-
+        
     def createWidgets(self):
         """Build GUI."""
         # Create Setup button
@@ -81,7 +84,10 @@ class ClientStreamer:
         """Teardown button handler."""
         self.sendRtspRequest(self.TEARDOWN)
         self.master.destroy()  # Close the gui window
-        os.remove(CACHE_FILE_NAME + str(self.sessionId) + CACHE_FILE_EXT)  # Delete the cache image from video
+        try:
+            os.remove(CACHE_FILE_NAME + str(self.sessionId) + CACHE_FILE_EXT)  # Delete the cache image from video
+        except FileNotFoundError:
+            pass
 
     # exit()
 
@@ -122,7 +128,7 @@ class ClientStreamer:
                 # Upon receiving ACK for TEARDOWN request,
                 # close the RTP socket
                 if self.teardownAcked == 1:
-                    self.rtpSocket.shutdown(socket.SHUT_RDWR)
+                    # self.rtpSocket.shutdown(socket.SHUT_RDWR)
                     self.rtpSocket.close()
                     break
 
@@ -158,7 +164,6 @@ class ClientStreamer:
             self.rtspSeq += 1
             print('\nSETUP event\n')
 
-            print(self.fileName)
             # Write the RTSP request to be sent.
             request = f"""SETUP {self.fileName}
 sequenceNumber: {self.rtspSeq}
@@ -227,7 +232,7 @@ hostname: {self.hostname} rtspPort: {self.rtpPort}"""
 
             # Close the RTSP socket upon requesting Teardown
             if self.requestSent == self.TEARDOWN:
-                self.rtspSocket.shutdown(socket.SHUT_RDWR)
+                # self.rtspSocket.shutdown(socket.SHUT_RDWR)
                 self.rtspSocket.close()
                 break
 
