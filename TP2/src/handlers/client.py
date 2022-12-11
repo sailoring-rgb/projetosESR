@@ -5,11 +5,6 @@ from time import sleep
 from src.Streaming.ClientStreamer import ClientStreamer
 
 
-def nearest_big_node(local_info):
-    # TODO calculate nearest big Node
-    return 0, 1
-
-
 def ui_handler(local_info, node_id, lock):
     print('A iniciar cliente...')
     print(local_info)
@@ -26,7 +21,7 @@ def ui_handler(local_info, node_id, lock):
         root = Tk()
 
         lock.acquire()
-        server_addr, server_port = nearest_big_node(local_info)
+        server_addr, server_port = local_info['nearest_server'][0][0], local_info['nearest_server'][0][1]
         rtp_address, rtp_port = (node_id, server_port)
         lock.release()
 

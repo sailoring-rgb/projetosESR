@@ -7,7 +7,6 @@ import struct
 import sys
 import threading
 import time
-import traceback
 import handlers.client as client
 from Streaming.ServerStreamer import ServerStreamer
 
