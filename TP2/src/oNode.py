@@ -57,13 +57,13 @@ message = {
 Nesta Format String, o caractere > indica que os dados estão em big-endian byte order,
 Os códigos de formatação individuais especificam os tipos dos campos em 'mensagem'.
 O código de formatação '64s' indica que os campos 'nodo' e 'port' são strings de até 64 caracteres,
-O código de formatação '32s' indica que os campos 'tempo' e 'last_refresh' são objetos de data e hora de até 32 chars
+O código de formatação '16s' indica que os campos 'tempo' e 'last_refresh' são objetos de data e hora de até 16 chars
 O código de formatação 'L' indica que o campo 'saltos' é um inteiro sem sinal de 32 bits,
 O código de formatação '?' indica que os campos 'is_server' e 'is_bigNode' são booleanos,
 O código de formatação '64s' no final indica que o campo 'nearest_server' é uma lista de strings de até 64 chars cada
 """
 
-PACKET_FORMAT = ">64s64s64s32sL32s??64s"
+PACKET_FORMAT = ">64s64s64s16sL16s??64s"
 
 
 # ----------------------- Enviar mensagens -----------------------
@@ -156,11 +156,25 @@ def listening(s):
         m0 = data.decode()
 
         print(f"[data]:\n[{data} from {address}]\n")
-        packet_data = struct.unpack(PACKET_FORMAT, data)
 
-        if 'nodo' not in packet_data:
+        node, port_f, port_s, timestamp, s, last_refresh, is_s, is_bn, nearest_s = struct.unpack(PACKET_FORMAT, data)
+
+        m1 = {
+            'nodo': node,
+            'flood_port': port_f,
+            'stream_port': port_s,
+            'tempo': timestamp,
+            'saltos': s,
+            'last_refresh': last_refresh,
+            'is_server': is_s,
+            'is_bigNode': is_bn,
+            'nearest_server': nearest_s
+        }
+
+        if 'nodo' not in m1:
             break
 
+        print(f"leu mensagem [{m1}] -> m1")
         m = json.loads(m0)
         receive_message(m, s)
 
