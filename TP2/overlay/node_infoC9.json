@@ -1,9 +1,9 @@
 {
   "node_id": "10.0.2.22",
-  "port_flooding": "3045",
-  "port_streaming": "4045",
+  "port_flooding": 3045,
+  "port_streaming": 4045,
   "ports": [
-              {"ip": "10.0.2.20", "port": "3040"}
+              {"ip": "10.0.2.20", "port": 3040}
             ],
   "is_bigNode": "False",
   "is_server": "False",
