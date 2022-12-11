@@ -37,7 +37,7 @@ local_info = []  # mirrors message structure
 # número max de saltos para o flooding
 max_hops = 20
 
-# The message that will be sent to other nodes
+# Estrutura da Mensagem a enviar aos nodos aquando do Flooding
 message = {
     'nodo': node_id,
     'port': my_port,
@@ -52,11 +52,11 @@ message = {
 """
 Nesta Format String, o caractere > indica que os dados estão em big-endian byte order,
 Os códigos de formatação individuais especificam os tipos dos campos em 'mensagem'.
-O código de formatação 64s indica que os campos 'nodo' e 'port' são strings de até 64 caracteres,
-O código de formatação 16s indica que os campos 'tempo' e 'last_refresh' são objetos de data e hora de até 16 caracteres
-O código de formatação L indica que o campo 'saltos' é um inteiro sem sinal de 32 bits,
-O ? código de formatação indica que os campos 'is_server' e 'is_bigNode' são booleanos,
-O código de formatação 64s no final indica que o campo 'nearest_server' é uma lista de strings de até 64 caracteres cada
+O código de formatação '64s' indica que os campos 'nodo' e 'port' são strings de até 64 caracteres,
+O código de formatação '16s' indica que os campos 'tempo' e 'last_refresh' são objetos de data e hora de até 16 chars
+O código de formatação 'L' indica que o campo 'saltos' é um inteiro sem sinal de 32 bits,
+O código de formatação '?' indica que os campos 'is_server' e 'is_bigNode' são booleanos,
+O código de formatação '64s' no final indica que o campo 'nearest_server' é uma lista de strings de até 64 chars cada
 """
 
 PACKET_FORMAT = ">64s64s16sL16s??64s"
@@ -176,14 +176,10 @@ lock = threading.Lock()
 
 threads = []
 
-# ------ CLIENTE -------
-
 if is_server == "False":
     media_player = threading.Thread(target=client.ui_handler, args=(local_info, node_id, lock))
     media_player.start()
     media_player.join()
-
-# ------ SERVIDOR ------
 
 elif is_server == "True":
     # refresh_table = threading.Thread(target=message_handler, args=())

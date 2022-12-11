@@ -1,8 +1,8 @@
 import os
 import re
 from tkinter import Tk
-from Streaming.ClientStreamer import ClientStreamer
 from time import sleep
+from src.Streaming.ClientStreamer import ClientStreamer
 
 
 def nearest_big_node(local_info):

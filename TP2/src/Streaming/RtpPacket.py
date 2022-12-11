@@ -1,4 +1,3 @@
-import sys
 from time import time
 
 HEADER_SIZE = 12
