@@ -150,10 +150,10 @@ def listening(s):
     print(f"[{node_id} à escuta em {port_flooding}]\n")
 
     while True:
-        data = s.recvfrom(1024)
+        data, address = s.recvfrom(1024)
         m0 = data.decode()
 
-        print(f"[m0]:\n[{m0}]\n")
+        print(f"[data]:\n[{data} from {address}]\n")
         packet_data = struct.unpack(PACKET_FORMAT, data)
 
         if 'nodo' not in packet_data:
@@ -167,7 +167,7 @@ def listening(s):
 
 def message_handler():
     time.sleep(30)
-    s = socket.socket()
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.bind((node_id, port_flooding))
 
     send = threading.Thread(target=refresh, args=(s,))
