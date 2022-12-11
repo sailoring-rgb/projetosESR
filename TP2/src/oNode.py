@@ -45,9 +45,9 @@ message = {
     'nodo': node_id,
     'flood_port': port_flooding,
     'stream_port': port_streaming,
-    'tempo': [datetime.time()],
+    'tempo': [datetime.datetime.now()],
     'saltos': 0,
-    'last_refresh': datetime.time(),
+    'last_refresh': datetime.datetime.now(),
     'is_server': is_server,
     'is_bigNode': is_bigNode,
     'nearest_server': []
@@ -91,8 +91,8 @@ def flood(s):
 
 def refresh_message():
     print(f"\n[{node_id}:{port_flooding}] is refreshing the flooding process.\n")
-    message['tempo'] = datetime.now()
-    message['last_refresh'] = datetime.now()
+    message['tempo'].insert(0, datetime.datetime.now())
+    message['last_refresh'] = datetime.datetime.now()
 
 
 def refresh(s):
