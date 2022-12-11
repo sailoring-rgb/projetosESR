@@ -136,9 +136,6 @@ def listening():
     s = socket.socket()
     s.bind((node_id, my_port))
 
-    # Start listening for incoming connections
-    s.listen(len(local_info))
-
     while True:
         data, address = s.recvfrom(1024)
         m0 = data.decode()
