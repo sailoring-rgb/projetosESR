@@ -161,7 +161,7 @@ class ServerStreamer:
 
         # Error messages
         elif code == self.FILE_NOT_FOUND_404:
-            print("404 NOT FOUND")
+            raise Exception("404")
 
         elif code == self.CON_ERR_500:
-            print("500 CONNECTION ERROR")
+            raise Exception("500")

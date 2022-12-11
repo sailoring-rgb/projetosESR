@@ -1,6 +1,6 @@
 import threading
 import socket
-from Streaming.ServerStreamer import ServerStreamer
+from src.Streaming.ServerStreamer import ServerStreamer
 
 
 def server_handler(port, node_id, lock):
@@ -16,8 +16,7 @@ def server_handler(port, node_id, lock):
     # Receive client info (address,port) through RTSP/TCP session
     while True:
         try:
-            clientInfo = {}
-            clientInfo['rtspSocket'] = rtspSocket.accept()  # clientInfo['rtspSocket'] = (clientConnection, clientAddress)
+            clientInfo = {'rtspSocket': rtspSocket.accept()}
             ServerStreamer(client_info).run()
         except Exception:
             break
