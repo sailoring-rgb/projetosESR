@@ -67,8 +67,9 @@ PACKET_FORMAT = ">64s64s16sL16s??64s"
 # ----------------------- enviar mensagens -----------------------
 
 def send_message(nodo, m):
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     print(f"\n\n[{nodo['ip']}:{nodo['port']}] is sending a message \n{m}\n\n")
+
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.bind((node_id, my_port))
 
     message_data = json.dumps(m)
@@ -107,6 +108,8 @@ def check_and_register(m):
 
 
 def receive_message(m):
+    print(f"[{node_id}:{my_port}] recebeu: \n[m].\n")
+
     delta = datetime.now() - m['tempo'][0]
     m['tempo'][1] = delta
 
