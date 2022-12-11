@@ -71,6 +71,8 @@ PACKET_FORMAT = ">64s64s64s16sL16s??64s"
 def default(obj):
     if isinstance(obj, datetime.datetime):
         return obj.isoformat()
+    if isinstance(obj, datetime.time):
+        return obj.strftime("%H:%M:%S")
     return json.JSONEncoder().default(obj)
 
 
