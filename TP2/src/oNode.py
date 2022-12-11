@@ -69,7 +69,7 @@ PACKET_FORMAT = ">64s64s16sL16s??64s"
 def send_message(nodo, m):
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     print(f"\n\n[{nodo['ip']}:{nodo['port']}] is sending a message \n{m}\n\n")
-    s.bind((nodo['ip'], int(nodo['port'])))
+    s.bind((node_id, my_port))
 
     message_data = json.dumps(m)
     s.send(message_data)
@@ -134,14 +134,13 @@ def receive_message(m):
 
 def listen_to(nodo):
     s = socket.socket()
-    s.bind((nodo['ip'], int(nodo['port'])))
+    s.bind((node_id, my_port))
 
     # Start listening for incoming connections
-    s.listen(1)
-    conn, addr = s.accept()
+    s.listen(len(local_info))
 
     while True:
-        data = conn.recv(1024)
+        data, address = s.recvfrom(1024)
         m0 = data.decode()
 
         packet_data = struct.unpack(PACKET_FORMAT, data)
@@ -152,7 +151,7 @@ def listen_to(nodo):
         m = json.loads(m0)
         receive_message(m)
 
-    conn.close()
+    s.close()
 
 
 def listening():
@@ -162,6 +161,7 @@ def listening():
 
 
 def message_handler():
+    time.sleep(60)
     rec = threading.Thread(target=listening, args=())
     send = threading.Thread(target=refresh, args=())
 
@@ -176,6 +176,7 @@ def message_handler():
 
 def handler_404(client_info):
     if is_bigNode:
+        # verifica se tem ficheiros? se sim -> envia ficheiros, se não -> envia pedidos
         pass
     else:
         print(f"404 NOT FOUND.\n{client_info}\n")
