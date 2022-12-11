@@ -1,6 +1,7 @@
 {
   "node_id": "10.0.1.22",
-  "my_port": 3010,
+  "port_flooding": 3010,
+  "port_streaming": 4010,
   "ports": [
               {"ip": "10.0.0.20", "port": 3005},
               {"ip": "10.0.3.20", "port": 3025},

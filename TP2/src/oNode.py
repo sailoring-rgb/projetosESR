@@ -26,8 +26,8 @@ connections = json.load(c)
 # ----------------------- Variaveis locais -----------------------
 
 node_id = info['node_id']
-port_flooding = int(info['port_flooding'])
-port_streaming = int(info['port_streaming'])
+port_flooding = info['port_flooding']
+port_streaming = info['port_streaming']
 is_bigNode = info['is_bigNode']  # True / False
 is_server = info['is_server']  # True / False
 ports = info['ports']  # ({'ip': '192.168.1.3', 'port': 5000})
@@ -80,7 +80,7 @@ def send_message(nodo, m, s):
     print(f"\n\n[{nodo['ip']}: {nodo['port']}] is sending a message \n{m}\n\n")
 
     message_data = json.dumps(m, default=default)
-    s.sendto(message_data.encode(), (nodo['ip'], int(nodo['port'])))
+    s.sendto(message_data.encode(), (nodo['ip'], nodo['port']))
     s.close()
 
 
