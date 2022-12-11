@@ -189,13 +189,12 @@ def handler_500(client_info):
 
 def stream():
     rtsp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    print(str(node_id) + " " + str(my_port))
     rtsp_socket.bind((node_id, my_port))
 
     if is_server == "True":
-        print(f"Servidor à escuta em {node_id}: {my_port}\n")
+        print(f"\nServidor à escuta em {node_id}: {my_port}\n")
     if is_bigNode == "True":
-        print(f"Big Node à escuta em {node_id}: {my_port}\n")
+        print(f"\nBig Node à escuta em {node_id}: {my_port}\n")
 
     rtsp_socket.listen(MAX_CONN)
 
