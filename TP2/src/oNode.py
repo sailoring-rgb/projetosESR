@@ -26,8 +26,8 @@ connections = json.load(c)
 # ----------------------- Variaveis locais -----------------------
 
 node_id = info['node_id']
-port_flooding = info['port_flooding']
-port_streaming = info['port_streaming']
+port_flooding = int(info['port_flooding'])
+port_streaming = int(info['port_streaming'])
 is_bigNode = info['is_bigNode']  # True / False
 is_server = info['is_server']  # True / False
 ports = info['ports']  # ({'ip': '192.168.1.3', 'port': 5000})
@@ -57,13 +57,13 @@ message = {
 Nesta Format String, o caractere > indica que os dados estão em big-endian byte order,
 Os códigos de formatação individuais especificam os tipos dos campos em 'mensagem'.
 O código de formatação '64s' indica que os campos 'nodo' e 'port' são strings de até 64 caracteres,
-O código de formatação '16s' indica que os campos 'tempo' e 'last_refresh' são objetos de data e hora de até 16 chars
+O código de formatação '32s' indica que os campos 'tempo' e 'last_refresh' são objetos de data e hora de até 32 chars
 O código de formatação 'L' indica que o campo 'saltos' é um inteiro sem sinal de 32 bits,
 O código de formatação '?' indica que os campos 'is_server' e 'is_bigNode' são booleanos,
 O código de formatação '64s' no final indica que o campo 'nearest_server' é uma lista de strings de até 64 chars cada
 """
 
-PACKET_FORMAT = ">64s64s64s16sL16s??64s"
+PACKET_FORMAT = ">64s64s64s32sL32s??64s"
 
 
 # ----------------------- Enviar mensagens -----------------------
@@ -80,7 +80,7 @@ def send_message(nodo, m, s):
     print(f"\n\n[{nodo['ip']}: {nodo['port']}] is sending a message \n{m}\n\n")
 
     message_data = json.dumps(m, default=default)
-    s.sendto(message_data.encode(), (nodo['ip'], nodo['port']))
+    s.sendto(message_data.encode(), (nodo['ip'], int(nodo['port'])))
     s.close()
 
 
