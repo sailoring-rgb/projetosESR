@@ -69,7 +69,7 @@ PACKET_FORMAT = ">64s64s64s16sL16s??64s"
 # ----------------------- Enviar mensagens -----------------------
 
 def default(obj):
-    if isinstance(obj, datetime):
+    if isinstance(obj, datetime.datetime):
         return obj.isoformat()
     return json.JSONEncoder().default(obj)
 
