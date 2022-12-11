@@ -72,7 +72,7 @@ def send_message(nodo, m):
     s.bind((node_id, my_port))
 
     message_data = json.dumps(m)
-    s.send(message_data)
+    s.sendto(message_data, (nodo['ip'], nodo['port']))
     s.close()
 
 
