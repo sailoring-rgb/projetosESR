@@ -31,7 +31,7 @@ is_bigNode = info['is_bigNode']  # True / False
 is_server = info['is_server']  # True / False
 ports = info['ports']  # ({'ip': '192.168.1.3', 'port': 5000})
 
-local_info = []  # mirrors message structure
+local_info = []# mirrors message structure
 
 # número max de saltos para o flooding
 max_hops = 20
@@ -73,7 +73,7 @@ def send_message(nodo, m):
     s.bind((node_id, my_port))
 
     message_data = json.dumps(m)
-    s.sendto(message_data, (nodo['ip'], nodo['port']))
+    s.sendto(message_data, (nodo['ip'], int(nodo['port'])))
     s.close()
 
 
@@ -155,7 +155,7 @@ def listening():
 
 
 def message_handler():
-    time.sleep(60)
+    time.sleep(180)
     rec = threading.Thread(target=listening, args=())
     send = threading.Thread(target=refresh, args=())
 
@@ -189,11 +189,12 @@ def handler_500(client_info):
 
 def stream():
     rtsp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    print(str(node_id) + " " + str(my_port))
     rtsp_socket.bind((node_id, my_port))
 
-    if is_server:
+    if is_server == "True":
         print(f"Servidor à escuta em {node_id}: {my_port}\n")
-    if is_bigNode:
+    if is_bigNode == "True":
         print(f"Big Node à escuta em {node_id}: {my_port}\n")
 
     rtsp_socket.listen(MAX_CONN)
@@ -222,24 +223,23 @@ lock = threading.Lock()
 
 threads = []
 
-refresh_table = threading.Thread(target=message_handler, args=())
-refresh_table.start()
+# refresh_table = threading.Thread(target=message_handler, args=())
+# refresh_table.start()
 
-if is_server or is_bigNode:
+if is_server == "True" or is_bigNode == "True":
     # escuta por pedidos e envia ficheiros
     streaming = threading.Thread(target=stream, args=())
     streaming.start()
 
-if not is_server:
+else:
     # faz pedidos
-    media_player = threading.Thread(target=client.ui_handler, args=(local_info, node_id, lock))
+    media_player = threading.Thread(target=client.ui_handler, args=(local_info, node_id, my_port, lock))
     media_player.start()
 
+# refresh_table.join()
 
-refresh_table.join()
-
-if is_server or is_bigNode:
+if is_server == "True" or is_bigNode == "True":
     streaming.join()
 
-if not is_server:
+else:
     media_player.join()

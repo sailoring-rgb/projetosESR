@@ -2,15 +2,21 @@ import os
 import re
 from tkinter import Tk
 from time import sleep
-from src.Streaming.ClientStreamer import ClientStreamer
+from Streaming.ClientStreamer import ClientStreamer
 
 
-def ui_handler(local_info, node_id, lock):
+def ui_handler(local_info, node_id, my_port, lock):
     print('A iniciar cliente...')
-    print(local_info)
+
+    local_info = {
+        "nearest_server": [
+            {"ip": "10.0.1.22",
+            "port": "3010"}
+        ]
+    }
     while True:
         if os.environ.get('DISPLAY', '') == '':
-            print('No display found... Using DISPLAY :0.0\n')
+            print('Nenhum display encontrado... Usar DISPLAY :0.0\n')
             os.environ.__setitem__('DISPLAY', ':0.0')
 
         current_pwd_path = os.path.dirname(os.path.abspath(__file__))
@@ -21,8 +27,10 @@ def ui_handler(local_info, node_id, lock):
         root = Tk()
 
         lock.acquire()
-        server_addr, server_port = local_info['nearest_server'][0][0], local_info['nearest_server'][0][1]
-        rtp_address, rtp_port = (node_id, server_port)
+        
+        # print("addr: " + str(local_info['nearest_server'][0][0]) + "\n" + "port: " + str(local_info['nearest_server'][0][1]))
+        server_addr, server_port = local_info['nearest_server'][0]["ip"], int(local_info['nearest_server'][0]["port"])
+        rtp_address, rtp_port = (node_id, my_port)
         lock.release()
 
         # Create a new client

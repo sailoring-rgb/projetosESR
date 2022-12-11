@@ -1,8 +1,8 @@
 from random import randint
 import threading, socket
 
-from src.Streaming.VideoStream import VideoStream
-from src.Streaming.RtpPacket import RtpPacket
+from Streaming.VideoStream import VideoStream
+from Streaming.RtpPacket import RtpPacket
 
 
 class ServerStreamer:
