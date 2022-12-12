@@ -102,16 +102,16 @@ def refresh(s):
 
 def check_and_register(m):
     if is_server:
-        message['nearest_server'].insert(0, (node_id, port_flooding, 0))
-        return
-
-    if m['is_server'] == "True" or m['is_big_node'] == "True":
+        if (node_id, port_flooding, 0) not in message['nearest_server']:
+            message['nearest_server'].insert(0, (node_id, port_flooding, 0))
+    else:
         delta = m['tempo'][1]
 
         if message['nearest_server']:
             if (message['nearest_server'][0][2] >= delta
                     or (message['nearest_server'][0][2] == delta and m['saltos'] < message['saltos'])):
-                message['nearest_server'].insert(0, (m['nodo'], m['stream_port'], delta))
+                if (node_id, port_flooding, delta) not in message['nearest_server']:
+                    message['nearest_server'].insert(0, (node_id, port_flooding, delta))
         else:
             message['nearest_server'].append((m['nodo'], m['stream_port'], delta))
 
