@@ -121,11 +121,11 @@ def receive_message(m, s):
 
     tempo_str = m['tempo'][0]
     refresh_str = m['last_refresh']
-    m['tempo'][0] = datetime.datetime.strptime(tempo_str, '%Y-%m-%d %H:%M:%S.%f')
-    m['last_refresh'] = datetime.datetime.strptime(refresh_str, '%Y-%m-%d %H:%M:%S.%f')
+    m['tempo'][0] = datetime.datetime.strptime(tempo_str.replace('T', ' '), '%Y-%m-%d %H:%M:%S.%f')
+    m['last_refresh'] = datetime.datetime.strptime(refresh_str.replace('T', ' '), '%Y-%m-%d %H:%M:%S.%f')
 
     delta = datetime.datetime.now() - m['tempo'][0]
-    m['tempo'][1] = delta
+    m['tempo'].insert(1, delta)
 
     if m['nodo'] == node_id:
         return
