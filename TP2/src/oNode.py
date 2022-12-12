@@ -73,7 +73,7 @@ def default(obj):
 
 
 def send_message(nodo, m, s):
-    print(f"\n\n[{nodo['ip']}: {nodo['port']}] is sending a message \n{m}\n\n")
+    print(f"\n\n[{nodo['ip']}:f{nodo['port']}] enviou: \n{json.dumps(m, indent=4)}\n\n")
 
     message_data = json.dumps(m, default=default)
     s.sendto(message_data.encode(), (nodo['ip'], int(nodo['port'])))
@@ -93,6 +93,7 @@ def refresh_message():
 def refresh(s):
     flood(s)
     while True:
+        print(f"local info:\n{json.dumps(local_info, indent=4)}\n\n")
         time.sleep(30)
         refresh_message()
         flood(s)
@@ -117,7 +118,7 @@ def check_and_register(m):
 
 
 def receive_message(m, s):
-    print(f"[{node_id}: {port_flooding}] recebeu: \n{m}.\n")
+    print(f"[{node_id}:f{port_flooding}] recebeu: \n{json.dumps(m, indent=4)}.\n")
 
     if m['nodo'] == node_id:
         return
@@ -154,7 +155,7 @@ def listening(s):
     while True:
         data, address = s.recvfrom(1024)
 
-        print(f"[data]:\n[{data} from {address}]\n")
+        # print(f"[data]:\n[{data} from {address}]\n")
 
         m = json.loads(data)
 
@@ -168,7 +169,7 @@ def listening(s):
 
 
 def message_handler():
-    time.sleep(30)
+    time.sleep(10)
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.bind((node_id, port_flooding))
 
