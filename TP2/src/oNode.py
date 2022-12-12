@@ -119,6 +119,11 @@ def check_and_register(m):
 def receive_message(m, s):
     print(f"[{node_id}: {port_flooding}] recebeu: \n{m}.\n")
 
+    tempo_str = m['tempo'][0]
+    refresh_str = m['last_refresh']
+    m['tempo'][0] = datetime.datetime.strptime(tempo_str, '%Y-%m-%d %H:%M:%S.%f')
+    m['last_refresh'] = datetime.datetime.strptime(refresh_str, '%Y-%m-%d %H:%M:%S.%f')
+
     delta = datetime.datetime.now() - m['tempo'][0]
     m['tempo'][1] = delta
 
