@@ -139,7 +139,6 @@ def receive_message(m, s):
         m['last_refresh'] = datetime.time()
         local_info.append(m)
 
-    # Verifica e Regista a informação do nodo na lista de servidores mais próximos
     check_and_register(m)
 
     flood(s)
