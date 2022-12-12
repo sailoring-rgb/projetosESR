@@ -3,7 +3,6 @@ import json
 import os
 import re
 import socket
-import struct
 import sys
 import threading
 import time
@@ -105,19 +104,23 @@ def check_and_register(m):
     if is_server:
         message['nearest_server'].insert(0, (node_id, port_flooding, 0))
         return
+
     if m['is_server'] == "True" or m['is_big_node'] == "True":
         delta = m['tempo'][1]
 
-        if message['nearest_server'] != [] or (message['nearest_server'][0][2] >= (m['nearest_server'][0][2] + delta)
-                                               or (message['nearest_server'][0][2] == m['nearest_server'][0][2]
-                                                   + delta and m['saltos'] < message['saltos'])):
-            message['nearest_server'].insert(0, (m['nodo'], m['stream_port'], m['tempo'][0] + delta))
+        if message['nearest_server']:
+            if (message['nearest_server'][0][2] >= delta
+                    or (message['nearest_server'][0][2] == delta and m['saltos'] < message['saltos'])):
+                message['nearest_server'].insert(0, (m['nodo'], m['stream_port'], delta))
         else:
-            message['nearest_server'].append((m['nodo'], m['stream_port'], m['tempo'][0] + delta))
+            message['nearest_server'].append((m['nodo'], m['stream_port'], delta))
 
 
 def receive_message(m, s):
     print(f"[{node_id}: {port_flooding}] recebeu: \n{m}.\n")
+
+    if m['nodo'] == node_id:
+        return
 
     tempo_str = m['tempo'][0]
     refresh_str = m['last_refresh']
@@ -126,12 +129,6 @@ def receive_message(m, s):
 
     delta = datetime.datetime.now() - m['tempo'][0]
     m['tempo'].insert(1, delta)
-
-    if m['nodo'] == node_id:
-        return
-
-    if m['saltos'] >= max_hops:
-        return
 
     # Se o nodo da mensagem já está na tabela local, atualiza
     if any(msg['nodo'] == m['nodo'] for msg in local_info):
@@ -142,6 +139,9 @@ def receive_message(m, s):
         m['saltos'] += 1
         m['last_refresh'] = datetime.time()
         local_info.append(m)
+
+    if m['saltos'] >= max_hops:
+        return
 
     check_and_register(m)
 
