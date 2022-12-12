@@ -14,14 +14,11 @@ file_id = sys.argv[1]
 
 current_pwd_path = os.path.dirname(os.path.abspath(__file__))
 video_pwd_path = (re.findall("(?:(.*?)src)", current_pwd_path))[0]
-path_to_topologia = os.path.join(video_pwd_path, "overlay/topologia" + str(file_id) + ".json")
 path_to_node_info = os.path.join(video_pwd_path, "overlay/node_info" + str(file_id) + ".json")
 
-c = open(path_to_topologia)
 i = open(path_to_node_info)
 
 info = json.load(i)
-connections = json.load(c)
 
 # ----------------------- Variaveis locais -----------------------
 
@@ -153,29 +150,15 @@ def listening(s):
 
     while True:
         data, address = s.recvfrom(1024)
-        m0 = data.decode()
 
         print(f"[data]:\n[{data} from {address}]\n")
 
-        node, port_f, port_s, timestamp, s, last_refresh, is_s, is_bn, nearest_s = struct.unpack(PACKET_FORMAT, data)
+        m = json.loads(data)
 
-        m1 = {
-            'nodo': node,
-            'flood_port': port_f,
-            'stream_port': port_s,
-            'tempo': timestamp,
-            'saltos': s,
-            'last_refresh': last_refresh,
-            'is_server': is_s,
-            'is_bigNode': is_bn,
-            'nearest_server': nearest_s
-        }
-
-        if 'nodo' not in m1:
+        if 'nodo' not in m:
             break
 
-        print(f"leu mensagem [{m1}] -> m1")
-        m = json.loads(m0)
+        print(f"leu mensagem [{m}]")
         receive_message(m, s)
 
     s.close()
