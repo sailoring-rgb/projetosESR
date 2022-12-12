@@ -78,7 +78,6 @@ def send_message(nodo, m, s):
 
     message_data = json.dumps(m, default=default)
     s.sendto(message_data.encode(), (nodo['ip'], int(nodo['port'])))
-    s.close()
 
 
 def flood(s):
