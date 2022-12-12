@@ -73,7 +73,7 @@ def default(obj):
 
 
 def send_message(nodo, m, s):
-    print(f"\n\n[{nodo['ip']}:f{nodo['port']}] enviou: \n{json.dumps(m, indent=4)}\n\n")
+    print(f"\n\n[{nodo['ip']}:f{nodo['port']}] enviou: \n{json.dumps(m, default=default, indent=4)}\n\n")
 
     message_data = json.dumps(m, default=default)
     s.sendto(message_data.encode(), (nodo['ip'], int(nodo['port'])))
@@ -93,7 +93,7 @@ def refresh_message():
 def refresh(s):
     flood(s)
     while True:
-        print(f"local info:\n{json.dumps(local_info, indent=4)}\n\n")
+        print(f"local info:\n{json.dumps(local_info, default=default, indent=4)}\n\n")
         time.sleep(30)
         refresh_message()
         flood(s)
@@ -112,13 +112,13 @@ def check_and_register(m):
             if (message['nearest_server'][0][2] >= delta
                     or (message['nearest_server'][0][2] == delta and m['saltos'] < message['saltos'])):
                 if (node_id, port_flooding, delta) not in message['nearest_server']:
-                    message['nearest_server'].insert(0, (node_id, port_flooding, delta))
+                    message['nearest_server'].insert(0, (m['nodo'], m['stream_port'], delta))
         else:
             message['nearest_server'].append((m['nodo'], m['stream_port'], delta))
 
 
 def receive_message(m, s):
-    print(f"[{node_id}:f{port_flooding}] recebeu: \n{json.dumps(m, indent=4)}.\n")
+    print(f"[{node_id}:f{port_flooding}] recebeu: \n{json.dumps(m, default=default, indent=4)}.\n")
 
     if m['nodo'] == node_id:
         return
