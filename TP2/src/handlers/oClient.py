@@ -21,7 +21,7 @@ def ui_handler(local_info, node_id, my_port, lock):
         filename = input(f'\n\nIntroduza o nome do video: \n')
 
         print("local_info: " + str(local_info))
-        if re.search(r"\:q",filename):
+        if re.search(r"\:q", filename):
             on = False
         else:
             path_to_filename = os.path.join(video_pwd_path, "play/" + str(filename))

@@ -100,21 +100,26 @@ def refresh(s):
 
 
 # ----------------------- Receber mensagens -----------------------
+"""
+se for servidor: não precisa de atualizar
+se for bignode: procura servidores mais próximos
+se for nodo: procura bignodes/servidores mais próximos
+"""
+
 
 def check_and_register(m):
-    if is_server:
-        if (node_id, port_flooding, 0) not in message['nearest_server']:
-            message['nearest_server'].insert(0, (node_id, port_flooding, 0))
-    else:
-        delta = m['tempo'][1]
-
+    delta = m['tempo'][1]
+    if is_bigNode:
         if message['nearest_server']:
             if (message['nearest_server'][0][2] >= delta
                     or (message['nearest_server'][0][2] == delta and m['saltos'] < message['saltos'])):
                 if (node_id, port_flooding, delta) not in message['nearest_server']:
                     message['nearest_server'].insert(0, (m['nodo'], m['stream_port'], delta))
-        else:
-            message['nearest_server'].append((m['nodo'], m['stream_port'], delta))
+    else:  # SAI SO
+        message['nearest_server'].append((m['nodo'], m['stream_port'], delta))
+
+
+# TODO MUDAR
 
 
 def receive_message(m, s):
@@ -172,6 +177,10 @@ def message_handler():
     time.sleep(10)
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.bind((node_id, port_flooding))
+
+    if is_server:
+        if (node_id, port_flooding, 0) not in message['nearest_server']:
+            message['nearest_server'].insert(0, (node_id, port_streaming, 0))
 
     send = threading.Thread(target=refresh, args=(s,))
     rec = threading.Thread(target=listening, args=(s,))
