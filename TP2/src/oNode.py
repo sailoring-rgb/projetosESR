@@ -234,7 +234,7 @@ if is_server == "True" or is_bigNode == "True":
 
 else:
     # Faz pedidos
-    media_player = threading.Thread(target=client.ui_handler, args=(local_info, node_id, port_streaming, lock))
+    media_player = threading.Thread(target=client.ui_handler, args=(message, node_id, port_streaming, lock))
     media_player.start()
 
 refresh_table.join()
