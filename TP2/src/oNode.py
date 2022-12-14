@@ -69,6 +69,8 @@ def default(obj):
         return obj.isoformat()
     if isinstance(obj, datetime.time):
         return obj.strftime("%H:%M:%S")
+    if isinstance(obj, datetime.timedelta):
+        return str(obj)
     return json.JSONEncoder().default(obj)
 
 
