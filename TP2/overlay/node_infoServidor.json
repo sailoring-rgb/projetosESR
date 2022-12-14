@@ -5,7 +5,7 @@
     "ports": [
                 {"ip": "10.0.0.20", "port": "3005"}
             ],
-    "is_bigNode": "False",
-    "is_server": "True",
+    "is_bigNode": false,
+    "is_server": true,
     "connections": ["10.0.0.20"]
 }

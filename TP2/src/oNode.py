@@ -27,11 +27,9 @@ info = json.load(i)
 node_id = info['node_id']
 port_flooding = int(info['port_flooding'])
 port_streaming = int(info['port_streaming'])
-is_bigNode = info['is_bigNode']  # True / False
-is_server = info['is_server']  # True / False
+is_bigNode = bool(info['is_bigNode'])  # True / False
+is_server = bool(info['is_server'])  # True / False
 ports = info['ports']  # ({'ip': '192.168.1.3', 'port': 5000})
-
-local_info = []  # mirrors message structure
 
 # Número max de saltos para o flooding
 max_hops = 20
@@ -44,7 +42,7 @@ message = {
     'nodo': node_id,
     'flood_port': port_flooding,
     'stream_port': port_streaming,
-    'tempo': [datetime.datetime.now()],
+    'tempo': [datetime.datetime.now(), datetime.datetime.now()],
     'saltos': 0,
     'last_refresh': datetime.datetime.now(),
     'is_server': is_server,
@@ -64,6 +62,7 @@ O código de formatação '64s' no final indica que o campo 'nearest_server' é 
 
 PACKET_FORMAT = ">64s64s64s16sL16s??64s"
 
+data_format = '%Y-%m-%d %H:%M:%S.%f'
 
 # ----------------------- Enviar mensagens -----------------------
 
@@ -71,7 +70,7 @@ def default(obj):
     if isinstance(obj, datetime.datetime):
         return obj.isoformat()
     if isinstance(obj, datetime.time):
-        return obj.strftime('%Y-%m-%d %H:%M:%S.%f')
+        return obj.strftime(data_format)
     if isinstance(obj, datetime.timedelta):
         return str(obj)
     return json.JSONEncoder().default(obj)
@@ -106,7 +105,7 @@ def refresh_message():
 def refresh(s):
     flood(s, message, port_list())
     while True:
-        print(f"local info:\n{json.dumps(local_info, default=default, indent=4)}\n\n")
+        print(f"local info:\n{json.dumps(message['nearest_server'], default=default, indent=4)}\n\n")
         time.sleep(30)
         refresh_message()
         flood(s, message, port_list())
@@ -116,8 +115,8 @@ def refresh(s):
 
 def add_datetime_variable(list_, delta):
     result = []
-    for ip, port, date in list_:
-        result.append((ip, port, date + delta))
+    for ip, port, date, s, b in list_:
+        result.append((ip, port, datetime.strptime(date, data_format) + delta, s, b))
     return result
 
 
@@ -144,35 +143,25 @@ def check_and_register(m, delta_m):
         lst = add_datetime_variable(m['nearest_server'], delta_m)
         merge = merge_lists(message['nearest_server'], filter_by_server(lst))
         message['nearest_server'] = merge
-    else:
+    elif not is_server and not is_bigNode:
         # procurar servidores ou bignodes e lista-los por proximidade
         lst = add_datetime_variable(m['nearest_server'], delta_m)
         message['nearest_server'] = merge_lists(message['nearest_server'], lst)
 
 
 def receive_message(m, s):
-    print(f"[{node_id}:f{port_flooding}] recebeu: \n{json.dumps(m, default=default, indent=4)}.\n")
-
     if m['nodo'] == node_id or is_server:
         return
 
+    print(f"[{node_id}:f{port_flooding}] recebeu: \n{json.dumps(m, default=default, indent=4)}.\n")
+
     tempo_str = m['tempo'][0]
     refresh_str = m['last_refresh']
-    m['tempo'][0] = datetime.datetime.strptime(tempo_str.replace('T', ' '), '%Y-%m-%d %H:%M:%S.%f')
-    m['last_refresh'] = datetime.datetime.strptime(refresh_str.replace('T', ' '), '%Y-%m-%d %H:%M:%S.%f')
+    m['tempo'][0] = datetime.datetime.strptime(tempo_str.replace('T', ' '), data_format)
+    m['last_refresh'] = datetime.datetime.strptime(refresh_str.replace('T', ' '), data_format)
 
     delta = datetime.datetime.now() - m['tempo'][0]
     m['tempo'][1] = delta
-
-    # Se o nodo da mensagem já está na tabela local, atualiza
-    if any(msg['nodo'] == m['nodo'] for msg in local_info):
-        existing_message = next(msg for msg in local_info if msg['nodo'] == m['nodo'])
-        existing_message.update(m)
-        existing_message['last_refresh'] = datetime.time()
-    else:
-        m['saltos'] += 1
-        m['last_refresh'] = datetime.time()
-        local_info.append(m)
 
     if m['saltos'] >= max_hops:
         return
@@ -231,7 +220,7 @@ threads = []
 refresh_table = threading.Thread(target=message_handler, args=())
 refresh_table.start()
 
-if is_server == "True" or is_bigNode == "True":
+if is_server or is_bigNode:
     # Escuta por pedidos e envia ficheiros
     streaming = threading.Thread(target=server.stream, args=(node_id, port_streaming, is_server, is_bigNode, MAX_CONN))
     streaming.start()
@@ -243,7 +232,7 @@ else:
 
 refresh_table.join()
 
-if is_server == "True" or is_bigNode == "True":
+if is_server or is_bigNode:
     streaming.join()
 
 else:
