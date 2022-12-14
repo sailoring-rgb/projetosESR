@@ -204,8 +204,9 @@ def message_handler():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.bind((node_id, port_flooding))
 
-    if is_server:
-        if (node_id, port_streaming, 0) not in message['nearest_server']:
+    if is_server or is_bigNode:
+        t = datetime.now() - datetime.now()
+        if (node_id, port_streaming, t, 0, is_server) not in message['nearest_server']:
             message['nearest_server'].insert(0, (node_id, port_streaming, 0))
 
     send = threading.Thread(target=refresh, args=(s,))
