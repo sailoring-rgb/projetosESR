@@ -99,7 +99,7 @@ def flood(s, m, list_):
 
 def refresh_message():
     print(f"\n[{node_id}:{port_flooding}] is refreshing the flooding process.\n")
-    message['tempo'].insert(0, datetime.datetime.now())
+    message['tempo'][0] = datetime.datetime.now()
     message['last_refresh'] = datetime.datetime.now()
 
 
@@ -137,7 +137,7 @@ def filter_by_server(lst):
 
 def check_and_register(m, delta_m):
     # se M não tiver nada a acrescentar -> sai
-    if not m['nearest_server'] or is_server:
+    if is_server:
         return
     if is_bigNode:
         # procurar só servidores
@@ -210,7 +210,7 @@ def message_handler():
     if is_server or is_bigNode:
         t = datetime.datetime.now() - datetime.datetime.now()
         if (node_id, port_streaming, t, 0, is_server) not in message['nearest_server']:
-            message['nearest_server'].insert(0, (node_id, port_streaming, 0))
+            message['nearest_server'].insert(0, (node_id, port_streaming, t, 0, is_server))
 
     send = threading.Thread(target=refresh, args=(s,))
     rec = threading.Thread(target=listening, args=(s,))
