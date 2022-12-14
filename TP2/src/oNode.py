@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, time, timedelta
 import json
 import os
 import re
@@ -42,9 +42,9 @@ message = {
     'nodo': node_id,
     'flood_port': port_flooding,
     'stream_port': port_streaming,
-    'tempo': [datetime.datetime.now(), datetime.datetime.now()],
+    'tempo': [datetime.now(), timedelta(days=0, hours=0, seconds=0)],
     'saltos': 0,
-    'last_refresh': datetime.datetime.now(),
+    'last_refresh': datetime.now(),
     'is_server': is_server,
     'is_bigNode': is_bigNode,
     'nearest_server': []  # ('ip', 'stream_port', 'tempo de viagem', saltos, # is_server:'True/False')
@@ -64,14 +64,13 @@ PACKET_FORMAT = ">64s64s64s16sL16s??64s"
 
 data_format = '%Y-%m-%d %H:%M:%S.%f'
 
+
 # ----------------------- Enviar mensagens -----------------------
 
 def default(obj):
-    if isinstance(obj, datetime.datetime):
+    if isinstance(obj, datetime):
         return obj.isoformat()
-    if isinstance(obj, datetime.time):
-        return obj.strftime(data_format)
-    if isinstance(obj, datetime.timedelta):
+    if isinstance(obj, timedelta):
         return str(obj)
     return json.JSONEncoder().default(obj)
 
@@ -98,8 +97,8 @@ def flood(s, m, list_):
 
 def refresh_message():
     print(f"\n[{node_id}:{port_flooding}] is refreshing the flooding process.\n")
-    message['tempo'][0] = datetime.datetime.now()
-    message['last_refresh'] = datetime.datetime.now()
+    message['tempo'][0] = datetime.now()
+    message['last_refresh'] = datetime.now()
 
 
 def refresh(s):
@@ -113,10 +112,20 @@ def refresh(s):
 
 # ----------------------- Receber mensagens -----------------------
 
+def convert_to_timedelta(data: str) -> timedelta:
+    parts = data.split(",")
+    days = int(parts[0].split(" ")[0])
+    seconds = int(parts[1].split(" ")[0])
+
+    delta = timedelta(days=days, seconds=seconds)
+    return delta
+
+
 def add_datetime_variable(list_, delta):
     result = []
     for ip, port, date, s, b in list_:
-        result.append((ip, port, datetime.datetime.strptime(date, data_format) + delta, s, b))
+        d = convert_to_timedelta(date)
+        result.append((ip, port, d + delta, s, b))
     return result
 
 
@@ -157,10 +166,10 @@ def receive_message(m, s):
 
     tempo_str = m['tempo'][0]
     refresh_str = m['last_refresh']
-    m['tempo'][0] = datetime.datetime.strptime(tempo_str.replace('T', ' '), data_format)
-    m['last_refresh'] = datetime.datetime.strptime(refresh_str.replace('T', ' '), data_format)
+    m['tempo'][0] = datetime.strptime(tempo_str.replace('T', ' '), data_format)
+    m['last_refresh'] = datetime.strptime(refresh_str.replace('T', ' '), data_format)
 
-    delta = datetime.datetime.now() - m['tempo'][0]
+    delta = datetime.now() - m['tempo'][0]
     m['tempo'][1] = delta
 
     if m['saltos'] >= max_hops:
@@ -197,7 +206,7 @@ def message_handler():
     s.bind((node_id, port_flooding))
 
     if is_server or is_bigNode:
-        t = datetime.datetime.now() - datetime.datetime.now()
+        t = timedelta(days=0, hours=0, seconds=0)
         if (node_id, port_streaming, t, 0, is_server) not in message['nearest_server']:
             message['nearest_server'].insert(0, (node_id, port_streaming, t, 0, is_server))
 
