@@ -46,7 +46,7 @@ message = {
     'last_refresh': datetime.datetime.now(),
     'is_server': is_server,
     'is_bigNode': is_bigNode,
-    'nearest_server': []
+    'nearest_server': []  # ('ip', 'stream_port', 'tempo de viagem', saltos, # is_server:'True/False')
 }
 
 """
@@ -116,36 +116,34 @@ def add_datetime_variable(list_, delta):
     return result
 
 
+def merge_lists(l1, l2):
+    merged_list = l1 + l2
+    sorted_list = sorted(merged_list, key=lambda x: (x[2], x[3]))
+    return sorted_list
+
+
+def filter_by_server(lst):
+    result = []
+    for tup in lst:
+        if tup[4]:
+            result.append(tup)
+    return result
+
+
 def check_and_register(m, delta_m):
     # se M não tiver nada a acrescentar -> sai
     if not m['nearest_server'] or is_server:
         return
-    # se for bignode: procura servidores mais próximos
     if is_bigNode:
-        # se tiver uma lista já formada, verifica se m têm caminhos mais rápidos
-        if message['nearest_server']:
-            t = message['nearest_server'][0][2]
-            t_m = m['nearest_server'][0][2]
-            if (t >= t_m + delta_m
-                    or (t >= t_m + delta_m and message['saltos'] > m['saltos'])):
-                merged_list = message['nearest_server'] + (add_datetime_variable(m['nearest_server'], delta_m))
-                sorted_list = sorted(merged_list, key=lambda x: x[2])
-                message.update({'nearest_server': sorted_list})
-        else:
-            message.update({'nearest_server': add_datetime_variable(m['nearest_server'], delta_m)})
-    # se for nodo: procura bignodes/servidores mais próximos
+        # procurar só servidores
+        lst = add_datetime_variable(m['nearest_server'], delta_m)
+        merge = merge_lists(message['nearest_server'], lst)
+        filtered = filter_by_server(merge)
+        message['nearest_server'] = filtered
     else:
-        # se tiver uma lista já formada, verifica se m têm caminhos mais rápidos
-        if message['nearest_server']:
-            t = message['nearest_server'][0][2]
-            t_m = m['nearest_server'][0][2]
-            if (t >= t_m + delta_m
-                    or (t >= t_m + delta_m and message['saltos'] > m['saltos'])):
-                merged_list = message['nearest_server'] + (add_datetime_variable(m['nearest_server'], delta_m))
-                sorted_list = sorted(merged_list, key=lambda x: x[2])
-                message.update({'nearest_server': sorted_list})
-        else:
-            message.update({'nearest_server': add_datetime_variable(m['nearest_server'], delta_m)})
+        # procurar servidores ou bignodes e lista-los por proximidade
+        lst = add_datetime_variable(m['nearest_server'], delta_m)
+        message['nearest_server'] = merge_lists(message['nearest_server'], lst)
 
 
 def receive_message(m, s):
