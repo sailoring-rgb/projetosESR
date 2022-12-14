@@ -32,7 +32,7 @@ def ui_handler(local_info, node_id, my_port, lock):
         lock.acquire()
 
         # print("addr: " + str(local_info['nearest_server'][0][0]) + "\n" + "port: " + str(local_info['nearest_server'][0][1]))
-        server_addr, server_port = local_info['nearest_server'][0]["ip"], int(local_info['nearest_server'][0]["stream_port"])
+        server_addr, server_port = local_info['nearest_server'][0][0], int(local_info['nearest_server'][0][1])
         rtp_address, rtp_port = (node_id, my_port)
         lock.release()
 
