@@ -6,6 +6,9 @@ import socket
 import sys
 import threading
 import time
+
+from socket import SO_REUSEADDR, SOL_SOCKET
+
 import handlers.oClient as client
 import handlers.oServer as server
 
@@ -68,7 +71,7 @@ def default(obj):
     if isinstance(obj, datetime.datetime):
         return obj.isoformat()
     if isinstance(obj, datetime.time):
-        return obj.strftime("%H:%M:%S")
+        return obj.strftime('%Y-%m-%d %H:%M:%S.%f')
     if isinstance(obj, datetime.timedelta):
         return str(obj)
     return json.JSONEncoder().default(obj)
@@ -139,9 +142,8 @@ def check_and_register(m, delta_m):
     if is_bigNode:
         # procurar só servidores
         lst = add_datetime_variable(m['nearest_server'], delta_m)
-        merge = merge_lists(message['nearest_server'], lst)
-        filtered = filter_by_server(merge)
-        message['nearest_server'] = filtered
+        merge = merge_lists(message['nearest_server'], filter_by_server(lst))
+        message['nearest_server'] = merge
     else:
         # procurar servidores ou bignodes e lista-los por proximidade
         lst = add_datetime_variable(m['nearest_server'], delta_m)
@@ -151,7 +153,7 @@ def check_and_register(m, delta_m):
 def receive_message(m, s):
     print(f"[{node_id}:f{port_flooding}] recebeu: \n{json.dumps(m, default=default, indent=4)}.\n")
 
-    if m['nodo'] == node_id:
+    if m['nodo'] == node_id or is_server:
         return
 
     tempo_str = m['tempo'][0]
@@ -160,7 +162,7 @@ def receive_message(m, s):
     m['last_refresh'] = datetime.datetime.strptime(refresh_str.replace('T', ' '), '%Y-%m-%d %H:%M:%S.%f')
 
     delta = datetime.datetime.now() - m['tempo'][0]
-    m['tempo'].insert(1, delta)
+    m['tempo'][1] = delta
 
     # Se o nodo da mensagem já está na tabela local, atualiza
     if any(msg['nodo'] == m['nodo'] for msg in local_info):
@@ -202,10 +204,11 @@ def listening(s):
 def message_handler():
     # time.sleep(10)
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
     s.bind((node_id, port_flooding))
 
     if is_server or is_bigNode:
-        t = datetime.now() - datetime.now()
+        t = datetime.datetime.now() - datetime.datetime.now()
         if (node_id, port_streaming, t, 0, is_server) not in message['nearest_server']:
             message['nearest_server'].insert(0, (node_id, port_streaming, 0))
 
