@@ -18,25 +18,26 @@ def ui_handler(local_info, node_id, my_port, lock):
 
         current_pwd_path = os.path.dirname(os.path.abspath(__file__))
         video_pwd_path = (re.findall("(?:(.*?)src)", current_pwd_path))[0]
-        filename = input(f'\n\nIntroduza o nome do video: \n')
+        # filename = input(f'\n\nIntroduza o nome do video: \n')
+        filename = "movie.Mjpeg"
 
-        print("local_info: " + str(local_info))
-        if re.search(r"\:q", filename):
-            on = False
-        else:
-            path_to_filename = os.path.join(video_pwd_path, "play/" + str(filename))
+        # print("local_info: " + str(local_info))
+        # if re.search(r"\:q", filename):
+        #    on = False
+        #else:
+        path_to_filename = os.path.join(video_pwd_path, "play/" + str(filename))
 
-            root = Tk()
+        root = Tk()
 
-            lock.acquire()
+        lock.acquire()
 
-            # print("addr: " + str(local_info['nearest_server'][0][0]) + "\n" + "port: " + str(local_info['nearest_server'][0][1]))
-            server_addr, server_port = local_info['nearest_server'][0]["ip"], int(local_info['nearest_server'][0]["stream_port"])
-            rtp_address, rtp_port = (node_id, my_port)
-            lock.release()
+        # print("addr: " + str(local_info['nearest_server'][0][0]) + "\n" + "port: " + str(local_info['nearest_server'][0][1]))
+        server_addr, server_port = local_info['nearest_server'][0]["ip"], int(local_info['nearest_server'][0]["stream_port"])
+        rtp_address, rtp_port = (node_id, my_port)
+        lock.release()
 
-            # Create a new client
-            app = ClientStreamer(root, server_addr, server_port, rtp_address, rtp_port, path_to_filename)
-            app.master.title("RTP Client")
-            root.mainloop()
-            sleep(2)
+        # Create a new client
+        app = ClientStreamer(root, server_addr, server_port, rtp_address, rtp_port, path_to_filename)
+        app.master.title("RTP Client")
+        root.mainloop()
+        sleep(2)
