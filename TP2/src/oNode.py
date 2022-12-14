@@ -116,7 +116,7 @@ def refresh(s):
 def add_datetime_variable(list_, delta):
     result = []
     for ip, port, date, s, b in list_:
-        result.append((ip, port, datetime.strptime(date, data_format) + delta, s, b))
+        result.append((ip, port, datetime.datetime.strptime(date, data_format) + delta, s, b))
     return result
 
 
