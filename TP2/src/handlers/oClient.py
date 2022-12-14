@@ -6,11 +6,9 @@ from Streaming.ClientStreamer import ClientStreamer
 
 
 def ui_handler(message, node_id, my_port, lock):
-    print('\nA iniciar cliente...')
-
-    on = True
+    print(f'\nA iniciar cliente {node_id}:{my_port}...')
     
-    while on:
+    while True:
         
         if os.environ.get('DISPLAY', '') == '':
             print('Nenhum display encontrado... Usar DISPLAY :0.0')
@@ -18,22 +16,17 @@ def ui_handler(message, node_id, my_port, lock):
 
         current_pwd_path = os.path.dirname(os.path.abspath(__file__))
         video_pwd_path = (re.findall("(?:(.*?)src)", current_pwd_path))[0]
-        # filename = input(f'\n\nIntroduza o nome do video: \n')
         filename = "movie.Mjpeg"
 
-        # print("local_info: " + str(local_info))
-        # if re.search(r"\:q", filename):
-        #    on = False
-        #else:
         path_to_filename = os.path.join(video_pwd_path, "play/" + str(filename))
 
         root = Tk()
 
         lock.acquire()
 
-        print("nearest_server: " + str(message['nearest_server']))
+        # print("nearest_server: " + str(message['nearest_server']))
+
         if message['nearest_server'] != []:
-        # print("addr: " + str(local_info['nearest_server'][0][0]) + "\n" + "port: " + str(local_info['nearest_server'][0][1]))
             server_addr, server_port = message['nearest_server'][0][0], int(message['nearest_server'][0][1])
             rtp_address, rtp_port = (node_id, my_port)
             lock.release()
