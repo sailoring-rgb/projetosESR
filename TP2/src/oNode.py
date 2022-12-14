@@ -72,6 +72,14 @@ def default(obj):
     return json.JSONEncoder().default(obj)
 
 
+def port_list_without(port):
+    return [x for x in ports if x != port]
+
+
+def port_list():
+    return ports
+
+
 def send_message(nodo, m, s):
     print(f"\n\n[{nodo['ip']}:f{nodo['port']}] enviou: \n{json.dumps(m, default=default, indent=4)}\n\n")
 
@@ -79,9 +87,9 @@ def send_message(nodo, m, s):
     s.sendto(message_data.encode(), (nodo['ip'], int(nodo['port'])))
 
 
-def flood(s):
-    for entry in ports:
-        send_message(entry, message, s)
+def flood(s, m, port_list):
+    for entry in port_list:
+        send_message(entry, m, s)
 
 
 def refresh_message():
@@ -91,12 +99,12 @@ def refresh_message():
 
 
 def refresh(s):
-    flood(s)
+    flood(s, message, port_list())
     while True:
         print(f"local info:\n{json.dumps(local_info, default=default, indent=4)}\n\n")
         time.sleep(30)
         refresh_message()
-        flood(s)
+        flood(s, message, port_list())
 
 
 # ----------------------- Receber mensagens -----------------------
@@ -169,7 +177,7 @@ def receive_message(m, s):
 
     check_and_register(m, delta)
 
-    flood(s)
+    flood(s, m, port_list_without(m['flood_port']))
 
 
 def listening(s):
@@ -185,7 +193,7 @@ def listening(s):
         if 'nodo' not in m:
             break
 
-        print(f"leu mensagem [{m}]")
+        # print(f"leu mensagem [{m}]")
         receive_message(m, s)
 
     s.close()
@@ -197,7 +205,7 @@ def message_handler():
     s.bind((node_id, port_flooding))
 
     if is_server:
-        if (node_id, port_flooding, 0) not in message['nearest_server']:
+        if (node_id, port_streaming, 0) not in message['nearest_server']:
             message['nearest_server'].insert(0, (node_id, port_streaming, 0))
 
     send = threading.Thread(target=refresh, args=(s,))
