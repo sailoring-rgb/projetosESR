@@ -200,7 +200,7 @@ def listening(s):
 
 
 def message_handler():
-    time.sleep(10)
+    # time.sleep(10)
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.bind((node_id, port_flooding))
 
