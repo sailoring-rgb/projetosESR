@@ -87,8 +87,8 @@ def send_message(nodo, m, s):
     s.sendto(message_data.encode(), (nodo['ip'], int(nodo['port'])))
 
 
-def flood(s, m, port_list):
-    for entry in port_list:
+def flood(s, m, list):
+    for entry in list:
         send_message(entry, m, s)
 
 
