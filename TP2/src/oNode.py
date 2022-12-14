@@ -69,6 +69,8 @@ def default(obj):
         return obj.isoformat()
     if isinstance(obj, datetime.time):
         return obj.strftime("%H:%M:%S")
+    if isinstance(obj, datetime.timedelta):
+        return str(obj)
     return json.JSONEncoder().default(obj)
 
 
@@ -198,7 +200,7 @@ def listening(s):
 
 
 def message_handler():
-    time.sleep(10)
+    # time.sleep(10)
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.bind((node_id, port_flooding))
 
@@ -232,7 +234,7 @@ if is_server == "True" or is_bigNode == "True":
 
 else:
     # Faz pedidos
-    media_player = threading.Thread(target=client.ui_handler, args=(local_info, node_id, port_streaming, lock))
+    media_player = threading.Thread(target=client.ui_handler, args=(message, node_id, port_streaming, lock))
     media_player.start()
 
 refresh_table.join()

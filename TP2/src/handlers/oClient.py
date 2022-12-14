@@ -5,7 +5,7 @@ from time import sleep
 from Streaming.ClientStreamer import ClientStreamer
 
 
-def ui_handler(local_info, node_id, my_port, lock):
+def ui_handler(message, node_id, my_port, lock):
     print('\nA iniciar cliente...')
 
     on = True
@@ -31,13 +31,15 @@ def ui_handler(local_info, node_id, my_port, lock):
 
         lock.acquire()
 
+        print("nearest_server: " + str(message['nearest_server']))
+        if message['nearest_server'] != []:
         # print("addr: " + str(local_info['nearest_server'][0][0]) + "\n" + "port: " + str(local_info['nearest_server'][0][1]))
-        server_addr, server_port = local_info['nearest_server'][0][0], int(local_info['nearest_server'][0][1])
-        rtp_address, rtp_port = (node_id, my_port)
-        lock.release()
+            server_addr, server_port = message['nearest_server'][0][0], int(message['nearest_server'][0][1])
+            rtp_address, rtp_port = (node_id, my_port)
+            lock.release()
 
-        # Create a new client
-        app = ClientStreamer(root, server_addr, server_port, rtp_address, rtp_port, path_to_filename)
-        app.master.title("RTP Client")
-        root.mainloop()
-        sleep(2)
+            # Create a new client
+            app = ClientStreamer(root, server_addr, server_port, rtp_address, rtp_port, path_to_filename)
+            app.master.title("RTP Client")
+            root.mainloop()
+            sleep(2)
