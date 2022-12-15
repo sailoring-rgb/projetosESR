@@ -113,7 +113,7 @@ def refresh(s):
 # ----------------------- Receber mensagens -----------------------
 
 def convert_to_timedelta(data: str) -> timedelta:
-    parts = data.split(",")
+    parts = data.split(":")
     days = int(parts[0].split(" ")[0])
     seconds = int(parts[1].split(" ")[0])
 
