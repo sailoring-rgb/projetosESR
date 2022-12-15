@@ -23,11 +23,13 @@ class ServerStreamer:
 
     clientInfo = {}
     nodes_interested = []
+    path = ''
     lock = threading.Lock
 
-    def __init__(self, clientInfo, nodes_interested):
+    def __init__(self, clientInfo, path, nodes_interested):
         self.clientInfo = clientInfo
         self.nodes_interested = nodes_interested
+        self.path = path
         
     def run(self):
         threading.Thread(target=self.recvRtspRequest).start()
@@ -65,7 +67,7 @@ class ServerStreamer:
                 # Update state
                 print("Processing SETUP..\n")
                 try:
-                    self.clientInfo['videoStream'] = VideoStream(str(filename))
+                    self.clientInfo['videoStream'] = VideoStream(str("/" + self.path + "/"+filename))
                     self.state = self.READY
                 except IOError:
                     self.replyRtsp(self.FILE_NOT_FOUND_404, seq)
