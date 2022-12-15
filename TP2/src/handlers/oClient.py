@@ -24,7 +24,7 @@ def ui_handler(message, node_id, my_port, lock):
 
         lock.acquire()
 
-        # print("nearest_server: " + str(message['nearest_server']))
+        print("nearest_server: " + str(message['nearest_server']))
 
         if message['nearest_server'] != []:
             server_addr, server_port = message['nearest_server'][0][0], int(message['nearest_server'][0][1])
