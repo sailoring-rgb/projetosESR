@@ -51,8 +51,9 @@ max_hops = 20
 # Número max de conexões
 MAX_CONN = 25
 
-# Estrutura da Mensagem a enviar aos nodos aquando do Flooding
 """
+Estrutura da Mensagem a enviar aos nodos aquando do Flooding:
+{
     ip do nodo,
     porta para flooding
     porta para streaming
@@ -69,6 +70,7 @@ MAX_CONN = 25
             número de saltos, 
             é Servidor?
         )]
+}
 """
 message = {
     'nodo': node_id,
@@ -91,7 +93,6 @@ O código de formatação 'L' indica que o campo 'saltos' é um inteiro sem sina
 O código de formatação '?' indica que os campos 'is_server' e 'is_bigNode' são booleanos,
 O código de formatação '64s' no final indica que o campo 'nearest_server' é uma lista de strings de até 64 chars cada
 """
-
 PACKET_FORMAT = ">64s64s64s16sL16s??64s"
 
 data_format = '%Y-%m-%d %H:%M:%S.%f'
