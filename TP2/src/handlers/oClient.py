@@ -8,9 +8,8 @@ from Streaming.ClientStreamer import ClientStreamer
 def ui_handler(message, node_id, my_port, lock):
     print(f'\nA iniciar cliente {node_id}:{my_port}...')
     
-    while message['nearest_server'] == [] : sleep(1)
-    
-    while True:
+    while not message['nearest_server']:
+        
         if os.environ.get('DISPLAY', '') == '':
             print('Nenhum display encontrado... Usar DISPLAY :0.0')
             os.environ.__setitem__('DISPLAY', ':0.0')
