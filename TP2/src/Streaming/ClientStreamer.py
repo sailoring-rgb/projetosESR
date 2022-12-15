@@ -254,7 +254,7 @@ hostname: {self.hostname} rtspPort: {self.rtpPort}"""
     def parseRtspReply(self, data):
         """Parse the RTSP reply from the server."""
         lines = data.split('\n')
-        if int(lines[0].split(' ')[1]) == 404:
+        if int(lines[0].split(' ')[1]) == 404 or int(lines[0].split(' ')[1]) == 500:
             next_server = self.next_(self.serverAddr)
 
             if next_server is not None:

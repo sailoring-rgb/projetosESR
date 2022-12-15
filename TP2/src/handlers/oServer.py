@@ -5,6 +5,7 @@ from Streaming.ServerStreamer import ServerStreamer
 
 
 def handler_404(client_info, is_big_node, nearest_server):
+    """
     if is_big_node:
         # envia um pedido ao servidor mais próximo
         for i in nearest_server:
@@ -14,6 +15,7 @@ def handler_404(client_info, is_big_node, nearest_server):
                 break
             except Exception:
                 continue
+    """
 
     print(f"404 NOT FOUND.\n{client_info}\n")
     reply = 'RTSP/1.0 404 NOT_FOUND\nCSeq: ' + '\nSession: ' + str(client_info['session'])
