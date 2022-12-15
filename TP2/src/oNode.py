@@ -229,21 +229,29 @@ threads = []
 refresh_table = threading.Thread(target=message_handler, args=())
 refresh_table.start()
 
-while True:
-    if is_server:
-        # Escuta por pedidos e envia ficheiros
-        streaming = threading.Thread(target=server.stream, args=(node_id, port_streaming, is_server, is_bigNode, MAX_CONN))
-        streaming.start()
+if message['nearest_server'] != []:
+    start = True
+else:
+    start = False
 
-    elif  is_bigNode:
-        # Escuta por pedidos e envia ficheiros
-        streaming = threading.Thread(target=server.stream, args=(node_id, port_streaming, is_server, is_bigNode, MAX_CONN))
-        streaming.start()
+if is_server:
+    # Escuta por pedidos e envia ficheiros
+    streaming = threading.Thread(target=server.stream, args=(node_id, port_streaming, is_server, is_bigNode, MAX_CONN))
+    streaming.start()
+
+elif is_bigNode:
+    # Escuta por pedidos e envia ficheiros
+    streaming = threading.Thread(target=server.stream, args=(node_id, port_streaming, is_server, is_bigNode, MAX_CONN))
+    streaming.start()
+
+while start:
+
+    if  is_bigNode:
         # Faz pedidos
         media_player = threading.Thread(target=client.ui_handler, args=(message, node_id, port_streaming, lock))
         media_player.start()
 
-    else:
+    elif not is_bigNode and not is_server:
         # Faz pedidos
         media_player = threading.Thread(target=client.ui_handler, args=(message, node_id, port_streaming, lock))
         media_player.start()
