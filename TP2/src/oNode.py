@@ -229,11 +229,6 @@ threads = []
 refresh_table = threading.Thread(target=message_handler, args=())
 refresh_table.start()
 
-if message['nearest_server'] != []:
-    start = True
-else:
-    start = False
-
 if is_server:
     # Escuta por pedidos e envia ficheiros
     streaming = threading.Thread(target=server.stream, args=(node_id, port_streaming, is_server, is_bigNode, MAX_CONN))
@@ -244,7 +239,7 @@ elif is_bigNode:
     streaming = threading.Thread(target=server.stream, args=(node_id, port_streaming, is_server, is_bigNode, MAX_CONN))
     streaming.start()
 
-while start:
+while True:
 
     if  is_bigNode:
         # Faz pedidos
