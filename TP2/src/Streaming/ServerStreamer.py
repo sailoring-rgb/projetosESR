@@ -57,6 +57,7 @@ class ServerStreamer:
         # Get the media file name
         filename = str(line1[1])
         self.clientInfo['fileName'] = filename
+        print("filename: " + filename)
 
         # Get the RTSP sequence number
         seq = int(((str(request[1])).split())[1])
@@ -67,6 +68,7 @@ class ServerStreamer:
                 # Update state
                 print("Processing SETUP..\n")
                 try:
+                    print("path: " + self.path)
                     self.clientInfo['videoStream'] = VideoStream(str("/" + self.path + "/"+filename))
                     self.state = self.READY
                 except IOError:
