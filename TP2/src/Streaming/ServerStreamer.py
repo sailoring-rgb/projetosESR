@@ -248,15 +248,7 @@ class ServerStreamer:
 
         # Error messages
         elif code == self.FILE_NOT_FOUND_404:
-            if self.is_bigNode:
-                # envia um pedido ao servidor mais próximo
-                for i in self.nearest_server:
-                    try:
-
-                        # envia pedido
-                        break
-                    except Exception:
-                        continue
+            raise Exception("404")
 
         elif code == self.CON_ERR_500:
             raise Exception("500")
