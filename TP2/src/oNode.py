@@ -239,13 +239,13 @@ elif  is_bigNode:
     streaming = threading.Thread(target=server.stream, args=(node_id, port_streaming, is_server, is_bigNode, MAX_CONN))
     streaming.start()
     # Faz pedidos
-    time.sleep(60)
+    time.sleep(30)
     media_player = threading.Thread(target=client.ui_handler, args=(message, node_id, port_streaming, lock))
     media_player.start()
 
 else:
     # Faz pedidos
-    time.sleep(60)
+    time.sleep(30)
     media_player = threading.Thread(target=client.ui_handler, args=(message, node_id, port_streaming, lock))
     media_player.start()
 
