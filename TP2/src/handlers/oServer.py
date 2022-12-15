@@ -6,7 +6,7 @@ from Streaming.ServerStreamer import ServerStreamer
 
 def handler_404(client_info, is_big_node):
     if is_big_node:
-        # Verifica se tem ficheiros? se sim -> envia ficheiros, se não -> envia pedidos
+        # envia um pedido ao servidor mais próximo
         pass
     else:
         print(f"404 NOT FOUND.\n{client_info}\n")
@@ -23,18 +23,20 @@ def handler_500(client_info):
     conn_socket.send(reply.encode())
 
 
-def stream(node_id, my_port, is_server, is_big_node, max_conn):
+def stream(streamer_info):
+    # streamer_info = (node_id, port_streaming, is_server, MAX_CONN, file_id)
     nodes_interested = []
+
     rtsp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     rtsp_socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-    rtsp_socket.bind((node_id, my_port))
+    rtsp_socket.bind((streamer_info[0], streamer_info[1]))
 
-    if is_server:
-        print(f"\nServidor à escuta em {node_id}: {my_port} (streaming)\n")
-    if is_big_node:
-        print(f"\nBig Node à escuta em {node_id}: {my_port} (streaming)\n")
+    if streamer_info[2]:
+        print(f"\nServidor à escuta em {streamer_info[0]}: {streamer_info[1]} (streaming)\n")
+    else:
+        print(f"\nBig Node à escuta em {streamer_info[0]}: {streamer_info[1]} (streaming)\n")
 
-    rtsp_socket.listen(max_conn)
+    rtsp_socket.listen(streamer_info[3])
 
     # Receber informação sobre cliente (ip,porta) através da sessão RTSP/TCP
     while True:
@@ -42,11 +44,11 @@ def stream(node_id, my_port, is_server, is_big_node, max_conn):
         client_info = {}
         try:
             client_info = {'rtspSocket': rtsp_socket.accept()}
-            nodes_interested.append(client_info)
-            ServerStreamer(client_info,nodes_interested).run()
+            ServerStreamer(client_info, streamer_info[4], nodes_interested).run()
+
         except Exception as ex:
             if ex == "404":
-                handler_404(client_info, is_big_node)
+                handler_404(client_info, not streamer_info[2])
             elif ex == "500":
                 handler_500(client_info)
             else:

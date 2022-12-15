@@ -165,11 +165,10 @@ class ClientStreamer:
             print('\nSETUP event\n')
 
             # Write the RTSP request to be sent.
-            request = f"""SETUP {self.fileName}
-sequenceNumber: {self.rtspSeq}
-hostname: {self.hostname} rtspPort: {self.rtpPort}"""
+            request = f"""SETUP {self.fileName} sequenceNumber: {self.rtspSeq} hostname: {self.hostname}
+            rtspPort: {self.rtpPort}"""
 
-            # Keep track of the sent request.
+            # Keep track of the request.
             self.requestSent = self.SETUP
 
         # Play request

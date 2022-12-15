@@ -21,13 +21,15 @@ class ServerStreamer:
     FILE_NOT_FOUND_404 = 1
     CON_ERR_500 = 2
 
+    path = ''
     clientInfo = {}
     nodes_interested = []
 
-    def __init__(self, clientInfo, nodes_interested):
+    def __init__(self, clientInfo, path, nodes_interested):
         self.clientInfo = clientInfo
         self.nodes_interested = nodes_interested
-        
+        self.path = path
+
     def run(self):
         threading.Thread(target=self.recvRtspRequest).start()
 
@@ -64,7 +66,7 @@ class ServerStreamer:
                 # Update state
                 print("Processing SETUP..\n")
                 try:
-                    self.clientInfo['videoStream'] = VideoStream(str(filename))
+                    self.clientInfo['videoStream'] = VideoStream(str(self.path + filename))
                     self.state = self.READY
                 except IOError:
                     self.replyRtsp(self.FILE_NOT_FOUND_404, seq)
@@ -160,8 +162,8 @@ class ServerStreamer:
         if code == self.OK_200:
             print("200 OK")
             reply = 'RTSP/1.0 200 OK\nCSeq: ' + str(seq) + '\nSession: ' + str(self.clientInfo['session'])
-            connSocket = (self.clientInfo['rtspSocket'])[0]
-            connSocket.send(reply.encode())
+            conn_socket = (self.clientInfo['rtspSocket'])[0]
+            conn_socket.send(reply.encode())
 
         # Error messages
         elif code == self.FILE_NOT_FOUND_404:
