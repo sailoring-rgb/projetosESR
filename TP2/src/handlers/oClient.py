@@ -6,7 +6,7 @@ from Streaming.ClientStreamer import ClientStreamer
 
 
 def ui_handler(message, node_id, my_port, lock):
-    print(f'\nA iniciar cliente {node_id}:{my_port}...')
+    print(f'\nA iniciar cliente {node_id}: {my_port}')
 
     while not message['nearest_server']:
         sleep(1)

@@ -22,6 +22,7 @@ class ServerStreamer:
     CON_ERR_500 = 2
 
     clientInfo = {}
+    nodes_interested =[]
 
     def __init__(self, clientInfo):
         self.clientInfo = clientInfo
@@ -69,6 +70,7 @@ class ServerStreamer:
 
                 # Generate a randomized RTSP session ID
                 self.clientInfo['session'] = randint(100000, 999999)
+                self.nodes_interested.append(self.clientInfo)
 
                 # Send RTSP reply
                 self.replyRtsp(self.OK_200, seq)
@@ -112,6 +114,8 @@ class ServerStreamer:
 
             self.replyRtsp(self.OK_200, seq)
 
+            self.nodes_interested.remove(self.clientInfo)
+            
             # Close the RTP socket
             self.clientInfo['rtpSocket'].close()
 
