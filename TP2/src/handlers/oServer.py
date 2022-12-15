@@ -16,14 +16,14 @@ def handler_404(client_info, is_big_node, nearest_server):
                 continue
 
     print(f"404 NOT FOUND.\n{client_info}\n")
-    reply = 'RTSP/1.0 404 NOT FOUND\nCSeq: ' + '\nSession: ' + str(client_info['session'])
+    reply = 'RTSP/1.0 404 NOT_FOUND\nCSeq: ' + '\nSession: ' + str(client_info['session'])
     conn_socket = (client_info['rtspSocket'])[0]
     conn_socket.send(reply.encode())
 
 
 def handler_500(client_info):
     print(f"500 CONNECTION ERROR.\n{client_info}\n")
-    reply = 'RTSP/1.0 500 CONNECTION ERROR\nCSeq: ' + '\nSession: ' + str(client_info['session'])
+    reply = 'RTSP/1.0 500 CONNECTION_ERROR\nCSeq: ' + '\nSession: ' + str(client_info['session'])
     conn_socket = (client_info['rtspSocket'])[0]
     conn_socket.send(reply.encode())
 

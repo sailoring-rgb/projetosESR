@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="7b5cb967-367f-4a3e-b3ad-21cadadbf23d" name="Changes" comment="" />
+    <list default="true" id="7b5cb967-367f-4a3e-b3ad-21cadadbf23d" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/src/handlers/oServer.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/handlers/oServer.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -107,7 +109,7 @@
       <workItem from="1670944485174" duration="5278000" />
       <workItem from="1671038798443" duration="13825000" />
       <workItem from="1671098701305" duration="18109000" />
-      <workItem from="1671123932753" duration="2205000" />
+      <workItem from="1671123932753" duration="2746000" />
     </task>
     <servers />
   </component>
