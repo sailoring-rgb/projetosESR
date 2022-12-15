@@ -21,15 +21,14 @@ class ServerStreamer:
     FILE_NOT_FOUND_404 = 1
     CON_ERR_500 = 2
 
-    path = ''
     clientInfo = {}
     nodes_interested = []
+    lock = threading.Lock
 
-    def __init__(self, clientInfo, path, nodes_interested):
+    def __init__(self, clientInfo, nodes_interested):
         self.clientInfo = clientInfo
         self.nodes_interested = nodes_interested
-        self.path = path
-
+        
     def run(self):
         threading.Thread(target=self.recvRtspRequest).start()
 
@@ -66,7 +65,7 @@ class ServerStreamer:
                 # Update state
                 print("Processing SETUP..\n")
                 try:
-                    self.clientInfo['videoStream'] = VideoStream(str(self.path + filename))
+                    self.clientInfo['videoStream'] = VideoStream(str(filename))
                     self.state = self.READY
                 except IOError:
                     self.replyRtsp(self.FILE_NOT_FOUND_404, seq)
@@ -133,12 +132,14 @@ class ServerStreamer:
             data = self.clientInfo['videoStream'].nextFrame()
             if data:
                 frameNumber = self.clientInfo['videoStream'].frameNbr()
-                try:
-                    address = self.clientInfo['rtspSocket'][1][0]
-                    port = int(self.clientInfo['rtpPort'])
-                    self.clientInfo['rtpSocket'].sendto(self.makeRtp(data, frameNumber), (address, port))
-                except:
-                    print("Connection Error!!")
+                self.lock.aquire()
+                for client in self.nodes_interested:
+                    try:
+                        address = client['rtspSocket'][1][0]
+                        port = int(client['rtpPort'])
+                        client['rtpSocket'].sendto(self.makeRtp(data, frameNumber), (address, port))
+                    except:
+                        print("Connection Error!!")
 
     def makeRtp(self, payload, frameNbr):
         """RTP-packetize the video data."""
@@ -162,8 +163,8 @@ class ServerStreamer:
         if code == self.OK_200:
             print("200 OK")
             reply = 'RTSP/1.0 200 OK\nCSeq: ' + str(seq) + '\nSession: ' + str(self.clientInfo['session'])
-            conn_socket = (self.clientInfo['rtspSocket'])[0]
-            conn_socket.send(reply.encode())
+            connSocket = (self.clientInfo['rtspSocket'])[0]
+            connSocket.send(reply.encode())
 
         # Error messages
         elif code == self.FILE_NOT_FOUND_404:
