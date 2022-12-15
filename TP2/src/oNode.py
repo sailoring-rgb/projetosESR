@@ -161,8 +161,13 @@ def add_datetime_variable(list_, delta):
     return result
 
 
-def merge_lists(l1, l2):
-    merged_list = l1 + l2
+def merge_lists(l1, l2, m):
+    new_list = []
+    for i_ in range(len(l2)):
+        new_tuple = (l2[i_][0], l2[i_][1], m['nodo'], m['stream_port'], l2[i_][4], l2[i_][5], l2[i_][6])
+        new_list.append(new_tuple)
+
+    merged_list = l1 + new_list
     sorted_list = sorted(merged_list, key=lambda x: (x[4], x[5]))
     return sorted_list
 
@@ -181,12 +186,12 @@ def check_and_register(m, delta_m):
     if is_bigNode:
         # procurar só servidores e manter-se a si como topo da lista
         lst = add_datetime_variable(m['nearest_server'], delta_m)
-        merge = merge_lists(message['nearest_server'], filter_by_server(lst))
+        merge = merge_lists(message['nearest_server'], filter_by_server(lst), m)
         message['nearest_server'] = merge
     elif not is_server and not is_bigNode:
         # procurar servidores ou bignodes e lista-los por proximidade
         lst = add_datetime_variable(m['nearest_server'], delta_m)
-        message['nearest_server'] = merge_lists(message['nearest_server'], lst)
+        message['nearest_server'] = merge_lists(message['nearest_server'], lst, m)
 
 
 def receive_message(m, s):

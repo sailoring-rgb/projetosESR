@@ -7,8 +7,11 @@ from Streaming.ClientStreamer import ClientStreamer
 
 def ui_handler(message, node_id, my_port, lock):
     print(f'\nA iniciar cliente {node_id}:{my_port}...')
-    
+
     while not message['nearest_server']:
+        sleep(1)
+
+    while True:
         
         if os.environ.get('DISPLAY', '') == '':
             print('Nenhum display encontrado... Usar DISPLAY :0.0')
@@ -26,7 +29,7 @@ def ui_handler(message, node_id, my_port, lock):
 
         print("nearest_server: " + str(message['nearest_server']))
 
-        if message['nearest_server'] != []:
+        if message['nearest_server']:
             server_addr, server_port = message['nearest_server'][0][0], int(message['nearest_server'][0][1])
             rtp_address, rtp_port = (node_id, my_port)
             lock.release()

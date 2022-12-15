@@ -1,6 +1,6 @@
-import os, re, socket, sys
-from tkinter import Tk
-from time import sleep
+import socket
+from socket import SO_REUSEADDR, SOL_SOCKET
+
 from Streaming.ServerStreamer import ServerStreamer
 
 
@@ -25,6 +25,7 @@ def handler_500(client_info):
 
 def stream(node_id, my_port, is_server, is_big_node, max_conn):
     rtsp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    rtsp_socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
     rtsp_socket.bind((node_id, my_port))
 
     if is_server == "True":
