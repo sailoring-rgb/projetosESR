@@ -5,7 +5,7 @@ from time import sleep
 from Streaming.ClientStreamer import ClientStreamer
 
 
-def ui_handler(local_info, node_id, my_port, lock):
+def ui_handler(message, node_id, my_port, lock):
     print(f'\nA iniciar cliente {node_id}:{my_port}...')
     
     while True:
@@ -24,10 +24,10 @@ def ui_handler(local_info, node_id, my_port, lock):
 
         lock.acquire()
 
-        print("nearest_server: " + str(local_info))
+        print("nearest_server: " + str(message['nearest_server']))
 
-        if local_info != []:
-            server_addr, server_port = local_info[0][0], int(local_info[0][1])
+        if message['nearest_server'] != []:
+            server_addr, server_port = message['nearest_server'][0][0], int(message['nearest_server'][0][1])
             rtp_address, rtp_port = (node_id, my_port)
             lock.release()
 
