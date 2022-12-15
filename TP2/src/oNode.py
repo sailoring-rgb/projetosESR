@@ -6,11 +6,12 @@ import socket
 import sys
 import threading
 import time
-
+import logging
+from logging import FileHandler
 from socket import SO_REUSEADDR, SOL_SOCKET
 
-import handlers.oClient as client
-import handlers.oServer as server
+import handlers.oClient as Client
+import handlers.oServer as Server
 
 file_id = sys.argv[1]
 
@@ -21,6 +22,19 @@ path_to_node_info = os.path.join(video_pwd_path, "overlay/node_info" + str(file_
 i = open(path_to_node_info)
 
 info = json.load(i)
+
+# ----------------------- Logger -----------------------
+
+# Create a FileHandler object
+handler = FileHandler(f"{file_id}.txt")
+
+# Create a Logger object and add the FileHandler
+logger = logging.getLogger(f"{file_id}")
+logger.addHandler(handler)
+
+# Set the log level
+logger.setLevel(logging.INFO)
+
 
 # ----------------------- Variaveis locais -----------------------
 
@@ -38,6 +52,24 @@ max_hops = 20
 MAX_CONN = 25
 
 # Estrutura da Mensagem a enviar aos nodos aquando do Flooding
+"""
+    ip do nodo,
+    porta para flooding
+    porta para streaming
+    (tempo de envio, delta de recepção da mensagem)
+    número de saltos
+    ultima atualização
+    é Servidor?
+    é Big Node?
+    lista ordenada de servidores mais próximos:
+        [(
+            'ip', 'stream_port', 
+            'ip interface de saída', 'stream_port interface de saída',
+            tempo que demora a chegar a este servidor, 
+            número de saltos, 
+            é Servidor?
+        )]
+"""
 message = {
     'nodo': node_id,
     'flood_port': port_flooding,
@@ -47,7 +79,7 @@ message = {
     'last_refresh': datetime.now(),
     'is_server': is_server,
     'is_bigNode': is_bigNode,
-    'nearest_server': []  # ('ip', 'stream_port', 'tempo de viagem', saltos, # is_server:'True/False')
+    'nearest_server': []
 }
 
 """
@@ -84,19 +116,19 @@ def port_list():
 
 
 def send_message(nodo, m, s):
-    print(f"\n\n[{nodo['ip']}:f{nodo['port']}] enviou: \n{json.dumps(m, default=default, indent=4)}\n\n")
-
     message_data = json.dumps(m, default=default)
     s.sendto(message_data.encode(), (nodo['ip'], int(nodo['port'])))
 
 
 def flood(s, m, list_):
     for entry in list_:
+        logger.info(f"\n[{node_id}] enviou para [{entry['ip']}:{entry['port']}]\n")
         send_message(entry, m, s)
+    logger.info(f"a mensagem:\n{json.dumps(m, default=default, indent=4)}\n\n")
 
 
 def refresh_message():
-    print(f"\n[{node_id}:{port_flooding}] is refreshing the flooding process.\n")
+    logger.info(f"\n[{node_id}:{port_flooding}] is refreshing the flooding process.\n")
     message['tempo'][0] = datetime.now()
     message['last_refresh'] = datetime.now()
 
@@ -104,7 +136,7 @@ def refresh_message():
 def refresh(s):
     flood(s, message, port_list())
     while True:
-        print(f"local info:\n{json.dumps(message['nearest_server'], default=default, indent=4)}\n\n")
+        logger.info(f"local info:\n{json.dumps(message['nearest_server'], default=default, indent=4)}\n\n")
         time.sleep(30)
         refresh_message()
         flood(s, message, port_list())
@@ -123,32 +155,31 @@ def convert_to_timedelta(data: str) -> timedelta:
 
 def add_datetime_variable(list_, delta):
     result = []
-    for ip, port, date, s, b in list_:
+    for ip, port, ip_is, port_is, date, s, b in list_:
         d = convert_to_timedelta(date)
-        result.append((ip, port, d + delta, s, b))
+        result.append((ip, port, ip_is, port_is, d + delta, s, b))
     return result
 
 
 def merge_lists(l1, l2):
     merged_list = l1 + l2
-    sorted_list = sorted(merged_list, key=lambda x: (x[2], x[3]))
+    sorted_list = sorted(merged_list, key=lambda x: (x[4], x[5]))
     return sorted_list
 
 
 def filter_by_server(lst):
     result = []
     for tup in lst:
-        if tup[4]:
+        if tup[6]:
             result.append(tup)
     return result
 
 
 def check_and_register(m, delta_m):
-    # se M não tiver nada a acrescentar -> sai
     if is_server:
         return
     if is_bigNode:
-        # procurar só servidores
+        # procurar só servidores e manter-se a si como topo da lista
         lst = add_datetime_variable(m['nearest_server'], delta_m)
         merge = merge_lists(message['nearest_server'], filter_by_server(lst))
         message['nearest_server'] = merge
@@ -162,7 +193,7 @@ def receive_message(m, s):
     if m['nodo'] == node_id or is_server:
         return
 
-    print(f"[{node_id}:f{port_flooding}] recebeu: \n{json.dumps(m, default=default, indent=4)}.\n")
+    logger.info(f"[{node_id}:f{port_flooding}] recebeu: \n{json.dumps(m, default=default, indent=4)}.\n")
 
     tempo_str = m['tempo'][0]
     refresh_str = m['last_refresh']
@@ -181,19 +212,19 @@ def receive_message(m, s):
 
 
 def listening(s):
-    print(f"[{node_id} à escuta em {port_flooding}]\n")
+    logger.info(f"[{node_id} à escuta em {port_flooding}]\n")
 
     while True:
         data, address = s.recvfrom(1024)
 
-        # print(f"[data]:\n[{data} from {address}]\n")
+        # logger.info(f"[data]:\n[{data} from {address}]\n")
 
         m = json.loads(data)
 
         if 'nodo' not in m:
             break
 
-        # print(f"leu mensagem [{m}]")
+        # logger.info(f"leu mensagem [{m}]")
         receive_message(m, s)
 
     s.close()
@@ -207,8 +238,8 @@ def message_handler():
 
     if is_server or is_bigNode:
         t = timedelta(days=0, hours=0, seconds=0)
-        if (node_id, port_streaming, t, 0, is_server) not in message['nearest_server']:
-            message['nearest_server'].insert(0, (node_id, port_streaming, t, 0, is_server))
+        if (node_id, port_streaming, node_id, port_streaming, t, 0, is_server) not in message['nearest_server']:
+            message['nearest_server'].insert(0, (node_id, port_streaming, node_id, port_streaming, t, 0, is_server))
 
     send = threading.Thread(target=refresh, args=(s,))
     rec = threading.Thread(target=listening, args=(s,))
@@ -231,20 +262,20 @@ refresh_table.start()
 
 if is_server:
     # Escuta por pedidos e envia ficheiros
-    streaming = threading.Thread(target=server.stream, args=(node_id, port_streaming, is_server, is_bigNode, MAX_CONN))
+    streaming = threading.Thread(target=Server.stream, args=(node_id, port_streaming, is_server, is_bigNode, MAX_CONN))
     streaming.start()
 
-elif  is_bigNode:
+elif is_bigNode:
     # Escuta por pedidos e envia ficheiros
-    streaming = threading.Thread(target=server.stream, args=(node_id, port_streaming, is_server, is_bigNode, MAX_CONN))
+    streaming = threading.Thread(target=Server.stream, args=(node_id, port_streaming, is_server, is_bigNode, MAX_CONN))
     streaming.start()
     # Faz pedidos
-    media_player = threading.Thread(target=client.ui_handler, args=(message, node_id, port_streaming, lock))
+    media_player = threading.Thread(target=Client.ui_handler, args=(message, node_id, port_streaming, lock))
     media_player.start()
 
 else:
     # Faz pedidos
-    media_player = threading.Thread(target=client.ui_handler, args=(message, node_id, port_streaming, lock))
+    media_player = threading.Thread(target=Client.ui_handler, args=(message, node_id, port_streaming, lock))
     media_player.start()
 
 refresh_table.join()
