@@ -267,7 +267,6 @@ if is_server or is_bigNode:
 
 if not is_server:
     # Faz pedidos
-    time.sleep(30)
     media_player = threading.Thread(target=Client.ui_handler, args=(message, node_id, port_streaming, lock))
     media_player.start()
 
