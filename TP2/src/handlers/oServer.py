@@ -24,6 +24,7 @@ def handler_500(client_info):
 
 
 def stream(node_id, my_port, is_server, is_big_node, max_conn):
+    nodes_interested = []
     rtsp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     rtsp_socket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
     rtsp_socket.bind((node_id, my_port))
@@ -41,7 +42,8 @@ def stream(node_id, my_port, is_server, is_big_node, max_conn):
         client_info = {}
         try:
             client_info = {'rtspSocket': rtsp_socket.accept()}
-            ServerStreamer(client_info).run()
+            nodes_interested.append(client_info)
+            ServerStreamer(client_info,nodes_interested).run()
         except Exception as ex:
             if ex == "404":
                 handler_404(client_info, is_big_node)
