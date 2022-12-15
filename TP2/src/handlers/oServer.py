@@ -9,9 +9,10 @@ def handler_404(client_info, is_big_node, nearest_server):
         # envia um pedido ao servidor mais próximo
         for i in nearest_server:
             try:
+
                 # envia pedido
                 break
-            except Exception as ex:
+            except Exception:
                 continue
 
     print(f"404 NOT FOUND.\n{client_info}\n")
@@ -47,7 +48,7 @@ def stream(streamer_info):
         client_info = {}
         try:
             client_info = {'rtspSocket': rtsp_socket.accept()}
-            ServerStreamer(client_info, streamer_info[4], nodes_interested).run()
+            ServerStreamer(client_info, streamer_info[4], nodes_interested, not streamer_info[2], streamer_info[5]).run()
 
         except Exception as ex:
             if ex == "404":

@@ -1,3 +1,5 @@
+import os
+import re
 from random import randint
 import threading, socket
 
@@ -21,15 +23,21 @@ class ServerStreamer:
     FILE_NOT_FOUND_404 = 1
     CON_ERR_500 = 2
 
+    request_type = ''
     clientInfo = {}
     # nodes_interested = []
     path = ''
-    # lock = threading.Lock
 
-    def __init__(self, clientInfo, path, nodes_interested):
+    is_bigNode = False
+    nearest_server = []
+    lock = threading.Lock
+
+    def __init__(self, clientInfo, path, nodes_interested, is_bigNode, nearest_server):
         self.clientInfo = clientInfo
         self.nodes_interested = nodes_interested
         self.path = path
+        self.is_bigNode = is_bigNode
+        self.nearest_server = nearest_server
         
     def run(self):
         threading.Thread(target=self.recvRtspRequest).start()
@@ -52,24 +60,27 @@ class ServerStreamer:
         # Get the request type
         request = (str(data)).splitlines()
         line1 = (str(request[0])).split()
-        requestType = str(line1[0])
+        self.request_type = str(line1[0])
 
         # Get the media file name
+
         filename = str(line1[1])
-        self.clientInfo['fileName'] = filename
-        print("filename: " + filename)
+
+        current_pwd_path = os.path.dirname(os.path.abspath(__file__))
+        video_pwd_path = (re.findall("(?:(.*?)src)", current_pwd_path))[0]
+        path_to_file = os.path.join(video_pwd_path, "play/" + str(self.path) + "/" + filename)
+
 
         # Get the RTSP sequence number
         seq = int(((str(request[1])).split())[1])
 
         # Process SETUP request
-        if requestType == self.SETUP:
+        if self.request_type == self.SETUP:
             if self.state == self.INIT:
                 # Update state
                 print("Processing SETUP..\n")
                 try:
-                    print("path: " + self.path)
-                    self.clientInfo['videoStream'] = VideoStream(str("/" + self.path + "/"+filename))
+                    self.clientInfo['videoStream'] = VideoStream(str(path_to_file))
                     self.state = self.READY
                 except IOError:
                     self.replyRtsp(self.FILE_NOT_FOUND_404, seq)
@@ -84,7 +95,7 @@ class ServerStreamer:
                 self.clientInfo['rtpPort'] = str(((str(request[2])).split())[3])
 
         # Process PLAY request
-        elif requestType == self.PLAY:
+        elif self.request_type == self.PLAY:
             if self.state == self.READY:
                 # Update state
                 print("Processing PLAY..\n")
@@ -101,7 +112,7 @@ class ServerStreamer:
                 self.clientInfo['worker'].start()
 
         # Process PAUSE request
-        elif requestType == self.PAUSE:
+        elif self.request_type == self.PAUSE:
             if self.state == self.PLAYING:
                 # Update state
                 print("Processing PAUSE..\n")
@@ -112,7 +123,7 @@ class ServerStreamer:
                 self.replyRtsp(self.OK_200, seq)
 
         # Process TEARDOWN request
-        elif requestType == self.TEARDOWN:
+        elif self.request_type == self.TEARDOWN:
             print("Processing TEARDOWN..\n")
 
             self.clientInfo['event'].set()
@@ -162,6 +173,71 @@ class ServerStreamer:
 
         return rtpPacket.getPacket()
 
+    def send(self):
+        if self.request_type == self.SETUP and self.state == self.INIT:
+            threading.Thread(target=self.recvRtspReply).start()
+            # Update RTSP sequence number.
+            self.rtspSeq += 1
+            print('\nSETUP event\n')
+
+            # Write the RTSP request to be sent.
+            request = f"""SETUP {self.fileName}
+        sequenceNumber: {self.rtspSeq}
+        hostname: {self.hostname} rtspPort: {self.rtpPort}"""
+
+            # Keep track of the request.
+            self.requestSent = self.SETUP
+
+        # Play request
+        elif self.request_type == self.PLAY and self.state == self.READY:
+            # Update RTSP sequence number.
+            self.rtspSeq += 1
+            print('\nPLAY event\n')
+
+            # Write the RTSP request to be sent.
+            request = f"""PLAY {self.fileName}
+        sequenceNumber: {self.rtspSeq}
+        hostname: {self.hostname} rtspPort: {self.rtpPort}"""
+
+            # Keep track of the sent request.
+            self.requestSent = self.PLAY
+
+        # Pause request
+        elif self.request_type == self.PAUSE and self.state == self.PLAYING:
+            # Update RTSP sequence number.
+            self.rtspSeq += 1
+            print('\nPAUSE event\n')
+
+            # Write the RTSP request to be sent.
+            request = f"""PAUSE {self.fileName}
+        sequenceNumber: {self.rtspSeq}
+        hostname: {self.hostname} rtspPort: {self.rtpPort}"""
+
+            # Keep track of the sent request.
+            self.requestSent = self.PAUSE
+
+        # Teardown request
+        elif self.request_type == self.TEARDOWN and not self.state == self.INIT:
+            # Update RTSP sequence number.
+            self.rtspSeq += 1
+            print('\nTEARDOWN event\n')
+
+            # Write the RTSP request to be sent.
+            request = f"""TEARDOWN {self.fileName}
+        sequenceNumber: {self.rtspSeq}
+        hostname: {self.hostname} rtspPort: {self.rtpPort}"""
+
+            # Keep track of the sent request.
+            self.requestSent = self.TEARDOWN
+        else:
+            return
+
+        # Send the RTSP request using rtspSocket.
+        destAddr = (self.serverAddr, self.serverPort)
+        self.rtspSocket.sendto(request.encode('utf-8'), destAddr)
+
+        print('\nData sent: \n' + request)
+
     def replyRtsp(self, code, seq):
         """Send RTSP reply to the client."""
         if code == self.OK_200:
@@ -172,7 +248,15 @@ class ServerStreamer:
 
         # Error messages
         elif code == self.FILE_NOT_FOUND_404:
-            raise Exception("404")
+            if self.is_bigNode:
+                # envia um pedido ao servidor mais próximo
+                for i in self.nearest_server:
+                    try:
+
+                        # envia pedido
+                        break
+                    except Exception:
+                        continue
 
         elif code == self.CON_ERR_500:
             raise Exception("500")

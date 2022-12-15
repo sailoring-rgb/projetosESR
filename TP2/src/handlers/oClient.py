@@ -17,11 +17,7 @@ def ui_handler(message, node_id, my_port, lock):
             print('Nenhum display encontrado... Usar DISPLAY :0.0')
             os.environ.__setitem__('DISPLAY', ':0.0')
 
-        current_pwd_path = os.path.dirname(os.path.abspath(__file__))
-        video_pwd_path = (re.findall("(?:(.*?)src)", current_pwd_path))[0]
         filename = "movie.Mjpeg"
-
-        path_to_filename = os.path.join(video_pwd_path, "play/" + str(filename))
 
         root = Tk()
 
@@ -35,7 +31,7 @@ def ui_handler(message, node_id, my_port, lock):
             lock.release()
 
             # Create a new client
-            app = ClientStreamer(root, server_addr, server_port, rtp_address, rtp_port, path_to_filename)
+            app = ClientStreamer(root, server_addr, server_port, rtp_address, rtp_port, filename)
             app.master.title("RTP Client")
             root.wait_visibility()
             root.mainloop()

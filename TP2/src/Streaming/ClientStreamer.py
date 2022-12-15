@@ -1,13 +1,12 @@
-import os,re
+import os
+import re
 import socket
 import threading
 import tkinter.messagebox as tkMessageBox
 from tkinter import *
 
 from PIL import Image, ImageTk
-
 from Streaming.RtpPacket import RtpPacket
-
 
 current_pwd_path = os.path.dirname(os.path.abspath(__file__))
 video_pwd_path = (re.findall("(?:(.*?)Streaming)", current_pwd_path))[0]
