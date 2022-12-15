@@ -22,9 +22,9 @@ class ServerStreamer:
     CON_ERR_500 = 2
 
     clientInfo = {}
-    nodes_interested = []
+    # nodes_interested = []
     path = ''
-    lock = threading.Lock
+    # lock = threading.Lock
 
     def __init__(self, clientInfo, path, nodes_interested):
         self.clientInfo = clientInfo
@@ -134,14 +134,14 @@ class ServerStreamer:
             data = self.clientInfo['videoStream'].nextFrame()
             if data:
                 frameNumber = self.clientInfo['videoStream'].frameNbr()
-                self.lock.aquire()
-                for client in self.nodes_interested:
-                    try:
-                        address = client['rtspSocket'][1][0]
-                        port = int(client['rtpPort'])
-                        client['rtpSocket'].sendto(self.makeRtp(data, frameNumber), (address, port))
-                    except:
-                        print("Connection Error!!")
+                # self.lock.aquire()
+                # for client in self.nodes_interested:
+                try:
+                    address = self.clientInfo['rtspSocket'][1][0]
+                    port = int(self.clientInfo['rtpPort'])
+                    self.clientInfo['rtpSocket'].sendto(self.makeRtp(data, frameNumber), (address, port))
+                except:
+                    print("Connection Error!!")
 
     def makeRtp(self, payload, frameNbr):
         """RTP-packetize the video data."""
