@@ -4,16 +4,20 @@ from socket import SO_REUSEADDR, SOL_SOCKET
 from Streaming.ServerStreamer import ServerStreamer
 
 
-def handler_404(client_info, is_big_node):
+def handler_404(client_info, is_big_node, nearest_server):
     if is_big_node:
         # envia um pedido ao servidor mais próximo
-        pass
-    else:
-        print(f"404 NOT FOUND.\n{client_info}\n")
-        reply = 'RTSP/1.0 404 NOT FOUND\nCSeq: ' + '\nSession: ' + str(client_info['session'])
-        conn_socket = (client_info['rtspSocket'])[0]
-        conn_socket.send(reply.encode())
-    pass
+        for i in nearest_server:
+            try:
+                # envia pedido
+                break
+            except Exception as ex:
+                continue
+
+    print(f"404 NOT FOUND.\n{client_info}\n")
+    reply = 'RTSP/1.0 404 NOT FOUND\nCSeq: ' + '\nSession: ' + str(client_info['session'])
+    conn_socket = (client_info['rtspSocket'])[0]
+    conn_socket.send(reply.encode())
 
 
 def handler_500(client_info):
@@ -24,7 +28,7 @@ def handler_500(client_info):
 
 
 def stream(streamer_info):
-    # streamer_info = (node_id, port_streaming, is_server, MAX_CONN, file_id)
+    # streamer_info = (node_id, port_streaming, is_server, MAX_CONN, file_id, message['nearest_server'])
     nodes_interested = []
 
     rtsp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -40,7 +44,6 @@ def stream(streamer_info):
 
     # Receber informação sobre cliente (ip,porta) através da sessão RTSP/TCP
     while True:
-
         client_info = {}
         try:
             client_info = {'rtspSocket': rtsp_socket.accept()}
@@ -48,7 +51,7 @@ def stream(streamer_info):
 
         except Exception as ex:
             if ex == "404":
-                handler_404(client_info, not streamer_info[2])
+                handler_404(client_info, not streamer_info[2], streamer_info[5])
             elif ex == "500":
                 handler_500(client_info)
             else:

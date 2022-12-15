@@ -268,7 +268,7 @@ refresh_table.start()
 
 if is_server or is_bigNode:
     # Escuta por pedidos e envia ficheiros
-    streamer_info = (node_id, port_streaming, is_server, MAX_CONN, file_id)
+    streamer_info = (node_id, port_streaming, is_server, MAX_CONN, file_id, message['nearest_server'])
     streaming = threading.Thread(target=Server.stream, args=(streamer_info, ))
     streaming.start()
 
