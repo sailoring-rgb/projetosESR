@@ -26,9 +26,11 @@ class ClientStreamer:
     TEARDOWN = 3
 
     hostname = socket.gethostname()
+    nearest_servers = []
+
 
     # Initiation..
-    def __init__(self, master, serveraddr, serverport, rtpaddress, rtpport, filename):
+    def __init__(self, master, serveraddr, serverport, rtpaddress, rtpport, filename, lista_servidores):
         self.master = master
         self.master.protocol("WM_DELETE_WINDOW", self.handler)
         self.createWidgets()
@@ -43,7 +45,8 @@ class ClientStreamer:
         self.teardownAcked = 0
         self.connectToServer()
         self.frameNbr = 0
-        
+        self.nearest_servers = lista_servidores
+
     def createWidgets(self):
         """Build GUI."""
         # Create Setup button
@@ -235,9 +238,30 @@ hostname: {self.hostname} rtspPort: {self.rtpPort}"""
                 self.rtspSocket.close()
                 break
 
+    # quando o ficheiro não existe no servidor atual, procura o próximo
+    def next_(self, ip):
+        if ip in [i for (i, p, ips, ps, t, s, b) in self.nearest_servers]:
+            index = [i for (i, p, ips, ps, t, s, b) in self.nearest_servers].index(ip)
+
+            if index == len(self.nearest_servers) - 1:
+                return None
+            else:
+                next_value = self.nearest_servers[index + 1]
+                return next_value[0], next_value[1]
+        else:
+            return None
+
     def parseRtspReply(self, data):
         """Parse the RTSP reply from the server."""
         lines = data.split('\n')
+        if int(lines[0].split(' ')[1]) == 404:
+            next_server = self.next_(self.serverAddr)
+
+            if next_server is not None:
+                self.serverAddr, self.serverPort = next_server
+            else:
+                print("Não havia servidores com o video disponivel")
+
         seqNum = int(lines[1].split(' ')[1])
 
         # Process only if the server reply's sequence number is the same as the request's

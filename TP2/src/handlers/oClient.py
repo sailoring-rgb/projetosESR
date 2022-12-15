@@ -31,7 +31,7 @@ def ui_handler(message, node_id, my_port, lock):
             lock.release()
 
             # Create a new client
-            app = ClientStreamer(root, server_addr, server_port, rtp_address, rtp_port, filename)
+            app = ClientStreamer(root, server_addr, server_port, rtp_address, rtp_port, filename, message['nearest_server'])
             app.master.title("RTP Client")
             root.wait_visibility()
             root.mainloop()
