@@ -22,7 +22,8 @@ class ServerStreamer:
     CON_ERR_500 = 2
 
     clientInfo = {}
-
+    nodes_interested =[]
+    
     def __init__(self, clientInfo):
         self.clientInfo = clientInfo
 
