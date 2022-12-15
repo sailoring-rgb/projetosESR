@@ -89,8 +89,7 @@ class ClientStreamer:
             os.remove(CACHE_FILE_NAME + str(self.sessionId) + CACHE_FILE_EXT)  # Delete the cache image from video
         except FileNotFoundError:
             pass
-
-    # exit()
+        exit()
 
     def pauseMovie(self):
         """Pause button handler."""
