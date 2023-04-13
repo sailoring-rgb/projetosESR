@@ -1,10 +1,10 @@
 # ESR
 
-Projetos de Engenharia de Serviços em Rede 22/23
+Projects accomplished in the scope of <b><i>Network Services Engineering 22/23</i></b>
 
-- Classificação Final: 15.5/20
+- Final Classification: 15.5/20
 
-# Autores
+# Authors
 
 - <a href="https://github.com/AnaMurta10">Ana Murta</a>
 - <a href="https://github.com/sailoring-rgb">Ana Henriques</a>
